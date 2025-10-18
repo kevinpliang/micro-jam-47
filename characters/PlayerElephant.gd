@@ -58,14 +58,15 @@ func _change_sprite():
 		if body.animation != "idle":
 			body.play("idle")
 		
-func _get_collision_owner(area: Node) -> CharacterBody2D:
+func _get_collision_owner(area: Node) -> Node:
 	var owner := area
-	while owner and not (owner is CharacterBody2D):
+	while owner:
+		if owner is CharacterBody2D:
+			return owner
 		owner = owner.get_parent()
-	return owner
+	return area.get_parent() if area else null
 
 func _on_area_entered(area):
-	print("somethings in my area")
 	var other := _get_collision_owner(area)
 	if other == null:
 		return

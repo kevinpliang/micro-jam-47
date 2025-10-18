@@ -23,11 +23,13 @@ func _ready():
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
 
-func _get_collision_owner(area: Node) -> CharacterBody2D:
+func _get_collision_owner(area: Node) -> Node:
 	var owner := area
-	while owner and not (owner is CharacterBody2D):
+	while owner:
+		if owner is CharacterBody2D:
+			return owner
 		owner = owner.get_parent()
-	return owner
+	return area.get_parent() if area else null
 
 func _physics_process(_delta):
 	if state == "inactive":

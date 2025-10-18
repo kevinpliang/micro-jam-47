@@ -26,6 +26,14 @@ func _ready():
 	# Connect area detection
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 
+func _get_collision_owner(area: Node) -> Node:
+	var owner := area
+	while owner:
+		if owner is CharacterBody2D:
+			return owner
+		owner = owner.get_parent()
+	return area.get_parent() if area else null
+
 func _pick_new_target():
 	# Try to pick a random position that's a good distance away
 	# Prefer directions that don't point straight at nearby lions.
@@ -86,17 +94,6 @@ func _physics_process(delta):
 	_change_sprite()
 	var decay = clamp(bounce_decay_rate * delta, 0.0, 1.0)
 	knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, decay)
-	
-# func _change_sprite():
-# 	if velocity.x < 0:
-# 		$Body.flip_h = true
-# 	elif velocity.x > 0:
-# 		$Body.flip_h = false
-		
-# 	if velocity != Vector2.ZERO:
-# 		$Body.play("run")
-# 	else:
-# 		$Body.play("idle")
 
 func _change_sprite():
 	var desired := absf(flipper.scale.x)
@@ -119,13 +116,13 @@ func _change_sprite():
 		
 func _on_area_entered(area):
 	# Check if we collided with a lion
-	if area.get_parent().is_in_group("lion"):
+	var other := _get_collision_owner(area)
+	if other and other.is_in_group("lion"):
 		game_over.emit()
 		# Stop moving
 		set_physics_process(false)
 
 func bounce_off_player(player_position: Vector2):
-	print('im bouncy')
 	var away = global_position - player_position
 	if away.length_squared() == 0.0:
 		away = Vector2.RIGHT
