@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://c1va6gdikjx07"]
+[gd_scene load_steps=4 format=3 uid="uid://c1va6gdikjx07"]
 
 [ext_resource type="Script" uid="uid://babbcgxinfa82" path="res://game/ui/main_menu.gd" id="1_8wqto"]
+[ext_resource type="Theme" uid="uid://x0f8326gtuqe" path="res://resources/Theme.tres" id="1_ol1tq"]
 
 [sub_resource type="Theme" id="Theme_d1ohb"]
 default_font_size = 32
@@ -13,6 +14,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_ol1tq")
 script = ExtResource("1_8wqto")
 
 [node name="TextureRect" type="TextureRect" parent="."]

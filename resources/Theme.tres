@@ -1,0 +1,6 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://x0f8326gtuqe"]
+
+[ext_resource type="FontFile" uid="uid://cnd6yqc30b1u5" path="res://resources/fonts/Fredoka-Medium.ttf" id="1_10srq"]
+
+[resource]
+default_font = ExtResource("1_10srq")

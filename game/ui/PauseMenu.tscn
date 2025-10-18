@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cf78vh16yletl"]
+[gd_scene load_steps=4 format=3 uid="uid://cf78vh16yletl"]
 
 [ext_resource type="Script" uid="uid://bvgnuys5wvw5l" path="res://game/ui/pause_menu.gd" id="1_wcy2j"]
+[ext_resource type="Theme" uid="uid://x0f8326gtuqe" path="res://resources/Theme.tres" id="2_g02oy"]
 
 [sub_resource type="Theme" id="Theme_wcy2j"]
 default_font_size = 32
@@ -29,6 +30,7 @@ offset_right = 24.0
 offset_bottom = 37.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_g02oy")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 custom_minimum_size = Vector2(200, 0)

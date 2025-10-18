@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://b4pw1ap8wlsoh"
-path="res://.godot/imported/Fredoka-VariableFont_wdth,wght.ttf-6df4677e5e17b7d0037799be341dd672.fontdata"
+uid="uid://hovv66ti1euf"
+path="res://.godot/imported/Fredoka-Bold.ttf-d3b67a93fc5df127bc0a56b2df16cee4.fontdata"
 
 [deps]
 
-source_file="res://resources/fonts/Fredoka-VariableFont_wdth,wght.ttf"
-dest_files=["res://.godot/imported/Fredoka-VariableFont_wdth,wght.ttf-6df4677e5e17b7d0037799be341dd672.fontdata"]
+source_file="res://resources/fonts/Fredoka-Bold.ttf"
+dest_files=["res://.godot/imported/Fredoka-Bold.ttf-d3b67a93fc5df127bc0a56b2df16cee4.fontdata"]
 
 [params]
 
