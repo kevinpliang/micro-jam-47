@@ -1,11 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://bvn8rqtnwi645"]
+[gd_scene load_steps=4 format=3 uid="uid://bvn8rqtnwi645"]
 
-[ext_resource type="Script" path="res://characters/PlayerElephant.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://c6vqd4cfnkekq" path="res://characters/PlayerElephant.gd" id="1_player"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(78, 58)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0scie"]
 size = Vector2(80, 60)
 
 [node name="PlayerElephant" type="CharacterBody2D"]
+collision_mask = 2
 script = ExtResource("1_player")
 
 [node name="Body" type="ColorRect" parent="."]
@@ -21,7 +25,7 @@ shape = SubResource("RectangleShape2D_player")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_player")
+shape = SubResource("RectangleShape2D_0scie")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(0.4, 0.4)
