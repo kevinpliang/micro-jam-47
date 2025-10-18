@@ -73,7 +73,8 @@ func _on_area_entered(area):
 
 	# Check if we collided with a lion - kill it!
 	if other.is_in_group("lion"):
-		other.queue_free()
+		if other.has_method("die"):
+			other.die()
 	elif other.is_in_group("baby_elephant"):
 		if other.has_method("bounce_off_player"):
 			other.bounce_off_player(global_position)

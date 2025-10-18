@@ -32,9 +32,13 @@ func _change_sprite():
 
 	flipper.scale.x = _facing
 
-	if velocity.length_squared() > .0001:
-		if body.animation != "run":
-			body.play('run')
-	else:
-		if body.animation != "idle":
-			body.play("idle")
+	body.play("run")
+			
+func die():
+	dead = true
+	$Flipper/Body.play("die")
+	$AnimationPlayer.play("die")
+
+func _on_animation_player_animation_finished(anim_name: StringName) -> void:
+	if anim_name == "die":
+		queue_free()
