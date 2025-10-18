@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ddgnlo0p2flp1"]
 
 [ext_resource type="Script" uid="uid://wpe1mvbakxpw" path="res://environment/level.gd" id="1_u5nnp"]
-[ext_resource type="Script" path="res://environment/background.gd" id="2_bg"]
+[ext_resource type="Script" uid="uid://husd7i7k6syc" path="res://environment/background.gd" id="2_bg"]
 
 [node name="Level" type="Node2D"]
 script = ExtResource("1_u5nnp")
@@ -49,7 +49,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="GameOverUI/Panel"]
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2

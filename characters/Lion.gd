@@ -14,3 +14,15 @@ func _physics_process(delta):
 		var direction = (baby_elephant.position - position).normalized()
 		velocity = direction * speed
 		move_and_slide()
+		_change_sprite()
+		
+func _change_sprite():
+	if velocity.x < 0:
+		$Body.flip_h = true
+	elif velocity.x > 0:
+		$Body.flip_h = false
+		
+	#if velocity != Vector2.ZERO:
+		#$Body.play("run")
+	#else:
+		#$Body.play("idle")
