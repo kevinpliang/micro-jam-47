@@ -28,11 +28,15 @@ text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="BabyArrow" type="Polygon2D" parent="UI"]
+[node name="BabyArrow" type="Line2D" parent="UI"]
 visible = false
 position = Vector2(960, 540)
-color = Color(0.9, 0.7, 0.8, 1)
-polygon = PackedVector2Array(40, 0, -20, -25, -20, -10, -40, -10, -40, 10, -20, 10, -20, 25)
+points = PackedVector2Array(-20, -30, 40, 0, -20, 30)
+width = 8.0
+default_color = Color(0.9, 0.7, 0.8, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
 
 [node name="GameOverUI" type="CanvasLayer" parent="."]
 visible = false
