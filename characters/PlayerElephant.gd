@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-@export var speed: float = 1000.0
+@export var speed: float = 600.0
 @export var click_radius: float = 64.0  # How close to click before considering it reached
 
 var target_position: Vector2
