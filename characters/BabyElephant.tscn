@@ -74,7 +74,7 @@ script = ExtResource("1_baby")
 visible = false
 shape = SubResource("RectangleShape2D_baby")
 
-[node name="Flipper" type="Node2D" parent="."]
+[node name="Flipper" type="Node2D" parent="." groups=["baby_elephant", "friendly"]]
 
 [node name="Body" type="AnimatedSprite2D" parent="Flipper"]
 position = Vector2(0.0079956055, -33.992004)

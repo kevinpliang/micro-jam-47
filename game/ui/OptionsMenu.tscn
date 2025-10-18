@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://pdcdd4mlwglp"]
+[gd_scene load_steps=3 format=3 uid="uid://pdcdd4mlwglp"]
 
 [ext_resource type="Script" uid="uid://bi8bgqfey6mjc" path="res://game/ui/options_menu.gd" id="1_87uvm"]
+[ext_resource type="Theme" uid="uid://x0f8326gtuqe" path="res://resources/Theme.tres" id="2_dkjyy"]
 
 [node name="OptionsMenu" type="Control"]
 process_mode = 3
@@ -26,12 +27,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -95.0
-offset_top = -48.5
-offset_right = 95.0
-offset_bottom = 48.5
+offset_left = -200.0
+offset_top = -87.5
+offset_right = 200.0
+offset_bottom = 87.5
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_dkjyy")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
@@ -49,6 +51,7 @@ columns = 2
 
 [node name="VolumeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 36
 text = "Volume"
 
 [node name="VolumeSlider" type="HSlider" parent="MarginContainer/VBoxContainer/GridContainer"]
@@ -60,6 +63,7 @@ value = 1.0
 
 [node name="FullscreenLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 36
 text = "Fullscreen"
 
 [node name="FullscreenCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/GridContainer"]
@@ -69,5 +73,7 @@ text = "
 "
 
 [node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Back"

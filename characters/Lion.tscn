@@ -99,7 +99,7 @@ script = ExtResource("1_lion")
 position = Vector2(4.567993, -4.432007)
 shape = SubResource("RectangleShape2D_lion")
 
-[node name="Flipper" type="Node2D" parent="."]
+[node name="Flipper" type="Node2D" parent="." groups=["lion"]]
 
 [node name="Body" type="AnimatedSprite2D" parent="Flipper"]
 position = Vector2(-9.432007, -16.432007)

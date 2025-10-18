@@ -74,7 +74,9 @@ func _update_tiles():
 				
 				if veg_count == 0:
 					var veg_sprite = Sprite2D.new()
-					veg_sprite.texture = vegetation_textures[rng.randi_range(0, vegetation_textures.size() - 1)]
+					var rand_texture = vegetation_textures[rng.randi_range(0, vegetation_textures.size() - 1)]
+					print(rand_texture.resource_name)
+					veg_sprite.texture = rand_texture
 					
 					veg_sprite.position = sprite.position 
 					if rng.randi_range(0,1):

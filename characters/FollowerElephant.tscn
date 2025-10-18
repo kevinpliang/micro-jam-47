@@ -67,7 +67,7 @@ script = ExtResource("1_follower")
 position = Vector2(0.0079956055, -0.9920044)
 shape = SubResource("RectangleShape2D_follower")
 
-[node name="Flipper" type="Node2D" parent="."]
+[node name="Flipper" type="Node2D" parent="." groups=["friendly"]]
 
 [node name="Body" type="AnimatedSprite2D" parent="Flipper"]
 modulate = Color(0.622594, 0.622594, 0.622594, 1)
