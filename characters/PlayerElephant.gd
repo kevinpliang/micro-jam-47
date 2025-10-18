@@ -67,7 +67,10 @@ func _change_sprite():
 func _on_area_entered(area):
 	# Check if we collided with a lion - kill it!
 	if area.get_parent().is_in_group("lion"):
-		area.get_parent().queue_free()
+		var lion = area.get_parent()
+		if lion.has_method("die"):
+			lion.die()
+		area.get_parent().die()
 	elif area.get_parent().is_in_group("baby_elephant"):
 		var baby = area.get_parent()
 		if baby.has_method("bounce_off_player"):

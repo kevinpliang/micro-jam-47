@@ -91,9 +91,12 @@ func _change_sprite():
 
 func _on_area_entered(area):
 	# Check if player touched us (only works for never-activated followers)
+	print(state)
+	print(has_been_activated_before)
 	if state == "inactive" and not has_been_activated_before:
 		var parent = area.get_parent()
 		if parent and parent.name == "PlayerElephant":
+
 			# Notify level to add us to the chain
 			if get_parent().has_method("add_follower_to_chain"):
 				get_parent().add_follower_to_chain(self)
