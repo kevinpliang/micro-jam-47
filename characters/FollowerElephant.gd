@@ -18,7 +18,7 @@ func _ready():
 	# Connect area detection to activate on player touch
 	$Area2D.area_entered.connect(_on_area_entered)
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if state == "inactive":
 		return
 

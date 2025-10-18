@@ -19,7 +19,7 @@ func _input(event):
 			target_position = get_global_mouse_position()
 			has_target = true
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if has_target:
 		var direction = (target_position - position).normalized()
 		var distance = position.distance_to(target_position)
@@ -51,3 +51,7 @@ func _on_area_entered(area):
 	# Check if we collided with a lion - kill it!
 	if area.get_parent().is_in_group("lion"):
 		area.get_parent().queue_free()
+	elif area.get_parent().is_in_group("baby_elephant"):
+		var baby = area.get_parent()
+		if baby.has_method("bounce_off_player"):
+			baby.bounce_off_player(global_position)

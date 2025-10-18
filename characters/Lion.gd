@@ -8,7 +8,7 @@ func _ready():
 	# Find the baby elephant in the scene
 	baby_elephant = get_tree().get_first_node_in_group("baby_elephant")
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if baby_elephant:
 		# Chase the baby elephant
 		var direction = (baby_elephant.position - position).normalized()

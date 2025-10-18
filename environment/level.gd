@@ -5,24 +5,50 @@ const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 
-@export var lion_spawn_interval: float = 3.0  # Spawn a lion every 3 seconds
-@export var follower_spawn_chance: float = 0.03  # 3% chance per new tile area
+@export var lion_spawn_interval: float = 3.0 # Spawn a lion every 3 seconds
+@export var follower_spawn_chance: float = 0.03 # 3% chance per new tile area
+@export var base_pts_per_sec: float = 10.0 # Base score gain per second
 
 var spawn_timer: float = 0.0
 var screen_size: Vector2
 var baby_elephant: Node2D
 var player_elephant: Node2D
 var follower_count_label: Label
-var spawned_followers: Dictionary = {}  # Track which tiles have spawned followers
-var followers: Array = []  # Track all active followers
-var activated_followers: int = 0  # Count of followers that have been activated
-var follower_chain_tail: Node2D = null  # The last follower in the chain
-var deployed_followers: Array = []  # Track followers that have been deployed
-var last_baby_tile: Vector2i = Vector2i(999999, 999999)  # Track baby's tile position
+var score_label: Label
+var stopwatch_label: Label
+var game_over_reason_label: Label
+var game_over_time_label: Label
+var game_over_score_label: Label
+var spawned_followers: Dictionary = {} # Track which tiles have spawned followers
+var followers: Array = [] # Track all active followers
+var activated_followers: int = 0 # Count of followers that have been activated
+var follower_chain_tail: Node2D = null # The last follower in the chain
+var deployed_followers: Array = [] # Track followers that have been deployed
+var last_baby_tile: Vector2i = Vector2i(999999, 999999) # Track baby's tile position
+var elapsed_time: float = 0.0
+var is_game_over: bool = false
+var score: int = 0
+var score_multiplier: float = 1.0
+var raw_score: float = 0.0
+var score_update_timer: float = 0.0
 
 func _ready():
+	set_process(true)
 	screen_size = get_viewport_rect().size
 	follower_count_label = $UI/FollowerCount
+	score_label = $UI/Score
+	stopwatch_label = $UI/Stopwatch
+	game_over_reason_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ReasonLabel
+	game_over_time_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/TimeLabel
+	game_over_score_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ScoreLabel
+	is_game_over = false
+	elapsed_time = 0.0
+	score_multiplier = 1.0
+	raw_score = 0.0
+	score_update_timer = 0.0
+	_set_score(0)
+	_update_stopwatch_label()
+	_reset_game_over_ui()
 	_spawn_elephants()
 
 func _input(event):
@@ -47,6 +73,12 @@ func _spawn_elephants():
 	add_child(baby_elephant)
 
 func _process(delta):
+	if is_game_over:
+		return
+
+	elapsed_time += delta
+	_update_stopwatch_label()
+
 	# Lion spawn timer
 	spawn_timer += delta
 	if spawn_timer >= lion_spawn_interval:
@@ -60,6 +92,22 @@ func _process(delta):
 		_update_follower_count()
 		_check_deployed_followers_offscreen()
 
+	if is_game_over:
+		return
+
+	var followers_with_player: int = _count_in_group_followers()
+	var result: Array[float] = score_tick(raw_score, delta, base_pts_per_sec, followers_with_player)
+	var new_raw_score: float = result[0]
+	score_multiplier = result[1]
+
+	raw_score = new_raw_score
+	score_update_timer += delta
+	while score_update_timer >= 1.0:
+		score_update_timer -= 1.0
+		var display_target: int = int(raw_score)
+		if display_target != score:
+			_set_score(display_target)
+
 func _spawn_lion():
 	var lion = Lion.instantiate()
 
@@ -69,31 +117,31 @@ func _spawn_lion():
 	var spawn_pos = Vector2.ZERO
 
 	# Account for camera zoom (0.4 means we see 2.5x more)
-	var zoom_factor = 2.5  # 1 / 0.4
+	var zoom_factor = 2.5 # 1 / 0.4
 	var visible_width = screen_size.x * zoom_factor
 	var visible_height = screen_size.y * zoom_factor
-	var spawn_margin = 100  # Extra distance outside view
+	var spawn_margin = 100 # Extra distance outside view
 
 	match edge:
-		0:  # Top
+		0: # Top
 			spawn_pos = Vector2(
-				camera_pos.x + randf_range(-visible_width/2, visible_width/2),
-				camera_pos.y - visible_height/2 - spawn_margin
+				camera_pos.x + randf_range(-visible_width / 2, visible_width / 2),
+				camera_pos.y - visible_height / 2 - spawn_margin
 			)
-		1:  # Right
+		1: # Right
 			spawn_pos = Vector2(
-				camera_pos.x + visible_width/2 + spawn_margin,
-				camera_pos.y + randf_range(-visible_height/2, visible_height/2)
+				camera_pos.x + visible_width / 2 + spawn_margin,
+				camera_pos.y + randf_range(-visible_height / 2, visible_height / 2)
 			)
-		2:  # Bottom
+		2: # Bottom
 			spawn_pos = Vector2(
-				camera_pos.x + randf_range(-visible_width/2, visible_width/2),
-				camera_pos.y + visible_height/2 + spawn_margin
+				camera_pos.x + randf_range(-visible_width / 2, visible_width / 2),
+				camera_pos.y + visible_height / 2 + spawn_margin
 			)
-		3:  # Left
+		3: # Left
 			spawn_pos = Vector2(
-				camera_pos.x - visible_width/2 - spawn_margin,
-				camera_pos.y + randf_range(-visible_height/2, visible_height/2)
+				camera_pos.x - visible_width / 2 - spawn_margin,
+				camera_pos.y + randf_range(-visible_height / 2, visible_height / 2)
 			)
 
 	# No bounds - infinite map!
@@ -105,7 +153,7 @@ func _check_baby_in_view():
 	var baby_pos = baby_elephant.position
 
 	# Calculate ACTUAL camera bounds accounting for zoom
-	var zoom_factor = 2.5  # 1 / 0.4
+	var zoom_factor = 2.5 # 1 / 0.4
 	var visible_width = screen_size.x * zoom_factor
 	var visible_height = screen_size.y * zoom_factor
 
@@ -137,7 +185,7 @@ func _update_baby_arrow(camera_pos: Vector2, baby_pos: Vector2):
 	var angle = direction.angle()
 
 	# Position arrow at edge of screen in the direction of baby
-	var arrow_distance = min(screen_size.x, screen_size.y) / 2 - 60  # 60px from edge
+	var arrow_distance = min(screen_size.x, screen_size.y) / 2 - 60 # 60px from edge
 	var screen_offset = direction * arrow_distance
 
 	# Convert to screen coordinates
@@ -145,23 +193,91 @@ func _update_baby_arrow(camera_pos: Vector2, baby_pos: Vector2):
 	arrow.position = screen_size / 2 + screen_offset
 	arrow.rotation = angle
 
-func _on_camera_lost():
-	# Baby wandered out of view
+func _update_stopwatch_label():
+	if stopwatch_label:
+		stopwatch_label.text = _format_time(elapsed_time)
+
+func _set_score(value: int) -> void:
+	score = value
+	_update_score_label()
+
+func _update_score_label() -> void:
+	if score_label:
+		score_label.text = "Score: %s" % _format_score(score)
+
+func _format_time(time_seconds: float) -> String:
+	var total_seconds = int(time_seconds)
+	var minutes = total_seconds / 60
+	var seconds = total_seconds % 60
+	return "%02d:%02d" % [minutes, seconds]
+
+func _format_score(value: int) -> String:
+	return "%d" % value
+
+func score_tick(score: float, delta: float, base_pts_per_sec: float, followers_with_player: int) -> Array[float]:
+	var t: float = clamp(float(min(followers_with_player, 10)) / 10.0, 0.0, 1.0)
+	var mult: float = 1.0 + 2.0 * pow(t, 1.75)
+	var new_score: float = score + base_pts_per_sec * mult * delta
+	var result: Array[float] = []
+	result.append(new_score)
+	result.append(mult)
+	return result	
+
+func _show_game_over(reason: String):
+	if is_game_over:
+		return
+	is_game_over = true
+	Main.current_state = Main.GameState.PAUSED
 	set_process(false)
-	$GameOverUI/Panel/CenterContainer/Label.text = "YOU LOSE\nBaby Wandered Off!"
+	if is_instance_valid(player_elephant):
+		player_elephant.set_process(false)
+		player_elephant.set_physics_process(false)
+	if is_instance_valid(baby_elephant):
+		baby_elephant.set_process(false)
+		baby_elephant.set_physics_process(false)
+	_update_stopwatch_label()
+	var final_score: int = int(raw_score)
+	if final_score != score:
+		_set_score(final_score)
+	if game_over_reason_label:
+		game_over_reason_label.text = reason
+	if game_over_time_label:
+		game_over_time_label.text = "Time Survived: %s" % _format_time(elapsed_time)
+	if game_over_score_label:
+		game_over_score_label.text = "Score: %s" % _format_score(final_score)
+	_update_score_label()
 	$GameOverUI.show()
+
+func _reset_game_over_ui():
+	$GameOverUI.hide()
+	if game_over_reason_label:
+		game_over_reason_label.text = ""
+	if game_over_time_label:
+		game_over_time_label.text = "Time Survived: %s" % _format_time(0.0)
+	if game_over_score_label:
+		game_over_score_label.text = "Score: %s" % _format_score(0)
+	score_multiplier = 1.0
+	raw_score = 0.0
+	score_update_timer = 0.0
+	_set_score(0)
+
+func _on_restart_button_pressed():
+	Main.current_state = Main.GameState.PLAYING
+	Main.load_scene("res://environment/Level.tscn")
+
+func _on_main_menu_button_pressed():
+	Main.current_state = Main.GameState.MENU
+	Main.load_scene("res://game/ui/MainMenu.tscn")
+
+func _on_camera_lost():
+	_show_game_over("The baby wandered off!")
 
 func _on_game_over():
-	# Stop spawning lions
-	set_process(false)
-
-	# Show game over UI
-	$GameOverUI/Panel/CenterContainer/Label.text = "YOU LOSE\nLion Got Baby!"
-	$GameOverUI.show()
+	_show_game_over("The lions got the baby!")
 
 func _check_follower_spawns():
 	# Check if baby has moved to a new tile region
-	var tile_size = 200  # Match background tile size
+	var tile_size = 200 # Match background tile size
 	var baby_pos = baby_elephant.position
 	var current_tile = Vector2i(int(baby_pos.x / tile_size), int(baby_pos.y / tile_size))
 
@@ -176,7 +292,7 @@ func _try_spawn_follower_in_region(center_tile: Vector2i):
 	var camera_pos = player_elephant.position
 
 	# Calculate visible area
-	var zoom_factor = 2.5  # 1 / 0.4
+	var zoom_factor = 2.5 # 1 / 0.4
 	var visible_width = screen_size.x * zoom_factor
 	var visible_height = screen_size.y * zoom_factor
 
@@ -187,7 +303,7 @@ func _try_spawn_follower_in_region(center_tile: Vector2i):
 	var visible_tile_radius_y = int(visible_height / tile_size / 2) + 1
 
 	# Check tiles in a larger radius around baby
-	var search_radius = 8  # Check further out
+	var search_radius = 8 # Check further out
 
 	for dy in range(-search_radius, search_radius + 1):
 		for dx in range(-search_radius, search_radius + 1):
@@ -281,7 +397,7 @@ func _get_follower_at_position(world_pos: Vector2) -> Node2D:
 	for follower in deployed_followers:
 		if is_instance_valid(follower):
 			var distance = follower.global_position.distance_to(world_pos)
-			if distance < 60:  # Click tolerance
+			if distance < 60: # Click tolerance
 				return follower
 	return null
 
@@ -330,7 +446,7 @@ func _check_deployed_followers_offscreen():
 		return
 
 	var camera_pos = player_elephant.position
-	var zoom_factor = 2.5  # 1 / 0.4
+	var zoom_factor = 2.5 # 1 / 0.4
 	var visible_width = screen_size.x * zoom_factor
 	var visible_height = screen_size.y * zoom_factor
 
