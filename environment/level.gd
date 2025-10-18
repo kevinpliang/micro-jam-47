@@ -8,6 +8,8 @@ const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 @export var lion_spawn_interval: float = 3.0 # Spawn a lion every 3 seconds
 @export var follower_spawn_chance: float = 0.03 # 3% chance per new tile area
 @export var base_pts_per_sec: float = 10.0 # Base score gain per second
+@export var player_spawn_radius: float = 500.0
+@export var baby_start_position: Vector2 = Vector2.ZERO
 
 var spawn_timer: float = 0.0
 var screen_size: Vector2
@@ -57,20 +59,31 @@ func _input(event):
 			_handle_right_click(event.position)
 
 func _spawn_elephants():
-	# Spawn both elephants at origin (infinite map)
-	var start_pos = Vector2(0, 0)
+	# Spawn elephants at configured start positions
+	var baby_start_pos = baby_start_position
 
-	# Spawn player elephant
-	player_elephant = PlayerElephant.instantiate()
-	player_elephant.position = start_pos
-	add_child(player_elephant)
-
-	# Baby elephant will spawn at origin and move randomly
+	# Baby elephant spawns at configured location and wanders from there
 	baby_elephant = BabyElephant.instantiate()
-	baby_elephant.position = start_pos
+	baby_elephant.position = baby_start_pos
 	baby_elephant.game_over.connect(_on_game_over)
 	baby_elephant.camera_lost.connect(_on_camera_lost)
 	add_child(baby_elephant)
+
+	# Spawn player elephant offset from baby within the configured radius
+	player_elephant = PlayerElephant.instantiate()
+	var player_start_pos = _random_point_within_radius(baby_start_pos, player_spawn_radius, 300.0)
+	player_elephant.position = player_start_pos
+	add_child(player_elephant)
+
+func _random_point_within_radius(center: Vector2, radius: float, min_distance: float = 0.0) -> Vector2:
+	var clamped_radius = max(radius, 0.0)
+	var clamped_min = clamp(min_distance, 0.0, clamped_radius)
+	if clamped_radius == 0.0:
+		return center
+
+	var angle = randf() * TAU
+	var distance = randf_range(clamped_min, clamped_radius)
+	return center + Vector2(cos(angle), sin(angle)) * distance
 
 func _process(delta):
 	if is_game_over:
@@ -239,7 +252,7 @@ func score_tick(score: float, delta: float, base_pts_per_sec: float, followers_w
 	var result: Array[float] = []
 	result.append(new_score)
 	result.append(mult)
-	return result	
+	return result
 
 func _show_game_over(reason: String):
 	if is_game_over:
