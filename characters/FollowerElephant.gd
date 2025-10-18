@@ -23,13 +23,11 @@ func _ready():
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
 
-func _get_collision_owner(area: Node) -> Node:
+func _get_collision_owner(area: Node) -> CharacterBody2D:
 	var owner := area
-	while owner:
-		if owner is CharacterBody2D:
-			return owner
+	while owner and not (owner is CharacterBody2D):
 		owner = owner.get_parent()
-	return area.get_parent() if area else null
+	return owner
 
 func _physics_process(_delta):
 	if state == "inactive":
@@ -120,7 +118,7 @@ func _on_area_entered(area):
 
 	# If a lion touches a follower, destroy the lion (same as player)
 	if other.is_in_group("lion") and state != "inactive":
-		other.queue_free()
+		other.die()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
 	is_activated = true
