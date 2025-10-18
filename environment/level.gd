@@ -149,49 +149,67 @@ func _spawn_lion():
 	add_child(lion)
 
 func _check_baby_in_view():
-	var camera_pos = player_elephant.position
 	var baby_pos = baby_elephant.position
+	var camera = get_viewport().get_camera_2d()
+	var camera_pos = camera.get_target_position()
 
 	# Calculate ACTUAL camera bounds accounting for zoom
-	var zoom_factor = 2.5 # 1 / 0.4
-	var visible_width = screen_size.x * zoom_factor
-	var visible_height = screen_size.y * zoom_factor
+	var zoom_factor = camera.zoom
+	var visible_width = screen_size.x / zoom_factor.x
+	var visible_height = screen_size.y / zoom_factor.y
 
 	var half_width = visible_width / 2
 	var half_height = visible_height / 2
-
+	
 	var camera_left = camera_pos.x - half_width
 	var camera_right = camera_pos.x + half_width
 	var camera_top = camera_pos.y - half_height
 	var camera_bottom = camera_pos.y + half_height
 
-	# Check if BABY is outside camera view
 	var is_offscreen = baby_pos.x < camera_left or baby_pos.x > camera_right or \
 					   baby_pos.y < camera_top or baby_pos.y > camera_bottom
 
 	if is_offscreen:
 		# Show arrow pointing to baby
-		_update_baby_arrow(camera_pos, baby_pos)
+		_update_baby_arrow(baby_pos)
 		$UI/BabyArrow.show()
 	else:
 		# Baby is on screen, hide arrow
 		$UI/BabyArrow.hide()
 
-func _update_baby_arrow(camera_pos: Vector2, baby_pos: Vector2):
-	# Calculate direction to baby from player
-	var direction = (baby_pos - camera_pos).normalized()
-
-	# Calculate angle for arrow rotation
-	var angle = direction.angle()
-
-	# Position arrow at edge of screen in the direction of baby
-	var arrow_distance = min(screen_size.x, screen_size.y) / 2 - 60 # 60px from edge
-	var screen_offset = direction * arrow_distance
-
-	# Convert to screen coordinates
+func _update_baby_arrow(baby_pos: Vector2):
+	var camera = get_viewport().get_camera_2d()
+	if not camera:
+		return
+		
+	var camera_pos = camera.global_position
+	var screen_size = get_viewport_rect().size
 	var arrow = $UI/BabyArrow
-	arrow.position = screen_size / 2 + screen_offset
+	
+	var direction = (baby_pos - camera_pos).normalized()
+	var angle = direction.angle()
 	arrow.rotation = angle
+
+	# Calculate intersection with screen edge
+	var half_w = screen_size.x / 2.0
+	var half_h = screen_size.y / 2.0
+	var padding = 90.0
+
+	# Start with large values and clamp to find where line hits screen boundary
+	var dx = direction.x
+	var dy = direction.y
+	var t = INF
+	
+	if abs(dx) > 0.0001:
+		t = min(t, half_w / abs(dx))
+	if abs(dy) > 0.0001:
+		t = min(t, half_h / abs(dy))
+	
+	var edge_point = direction * t
+	# Bring it slightly inward
+	var arrow_pos = screen_size / 2 + (edge_point - direction * padding)
+	arrow.position = arrow_pos
+
 
 func _update_stopwatch_label():
 	if stopwatch_label:
@@ -373,9 +391,6 @@ func add_follower_to_chain(follower: Node2D):
 	# Immediately update the count display
 	_update_follower_count()
 
-func on_follower_activated(follower: Node2D, activator: Node2D):
-	# Legacy method - no longer used
-	pass
 
 func _handle_right_click(screen_pos: Vector2):
 	# Convert screen position to world position
@@ -444,12 +459,14 @@ func _check_deployed_followers_offscreen():
 	# Check if any deployed followers have left the camera view
 	if deployed_followers.is_empty():
 		return
+		
+	var camera = get_viewport().get_camera_2d()
+	var camera_pos = camera.get_target_position()
 
-	var camera_pos = player_elephant.position
-	var zoom_factor = 2.5 # 1 / 0.4
-	var visible_width = screen_size.x * zoom_factor
-	var visible_height = screen_size.y * zoom_factor
-
+	var zoom_factor = camera.zoom
+	var visible_width = screen_size.x / zoom_factor.x
+	var visible_height = screen_size.y / zoom_factor.y
+	
 	var half_width = visible_width / 2
 	var half_height = visible_height / 2
 
