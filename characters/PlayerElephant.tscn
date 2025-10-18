@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bvn8rqtnwi645"]
+[gd_scene load_steps=14 format=3 uid="uid://bvn8rqtnwi645"]
 
 [ext_resource type="Script" uid="uid://c6vqd4cfnkekq" path="res://characters/PlayerElephant.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_joyqf"]
@@ -49,15 +49,18 @@ radius = 84.0
 height = 170.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hb80a"]
-radius = 142.0
-height = 288.0
+radius = 138.0
+height = 282.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_33fq1"]
 radius = 28.000004
 height = 60.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3kbpk"]
-size = Vector2(73, 35)
+size = Vector2(73, 51.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_joyqf"]
+size = Vector2(40, 33)
 
 [node name="PlayerElephant" type="CharacterBody2D" groups=["friendly"]]
 collision_mask = 0
@@ -86,7 +89,7 @@ position = Vector2(83, -3)
 shape = SubResource("CapsuleShape2D_joyqf")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(7, 9)
+position = Vector2(5, 3)
 shape = SubResource("CapsuleShape2D_hb80a")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="Flipper/Area2D"]
@@ -95,5 +98,9 @@ rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_33fq1")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(-68, 117)
+position = Vector2(-70, 110)
 shape = SubResource("RectangleShape2D_3kbpk")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Flipper/Area2D"]
+position = Vector2(84, 113.5)
+shape = SubResource("RectangleShape2D_joyqf")
