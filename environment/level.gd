@@ -117,10 +117,33 @@ func _check_baby_in_view():
 	var camera_top = camera_pos.y - half_height
 	var camera_bottom = camera_pos.y + half_height
 
-	# Check if BABY is outside camera view (wandered too far)
-	if baby_pos.x < camera_left or baby_pos.x > camera_right or \
-	   baby_pos.y < camera_top or baby_pos.y > camera_bottom:
-		_on_camera_lost()
+	# Check if BABY is outside camera view
+	var is_offscreen = baby_pos.x < camera_left or baby_pos.x > camera_right or \
+					   baby_pos.y < camera_top or baby_pos.y > camera_bottom
+
+	if is_offscreen:
+		# Show arrow pointing to baby
+		_update_baby_arrow(camera_pos, baby_pos)
+		$UI/BabyArrow.show()
+	else:
+		# Baby is on screen, hide arrow
+		$UI/BabyArrow.hide()
+
+func _update_baby_arrow(camera_pos: Vector2, baby_pos: Vector2):
+	# Calculate direction to baby from player
+	var direction = (baby_pos - camera_pos).normalized()
+
+	# Calculate angle for arrow rotation
+	var angle = direction.angle()
+
+	# Position arrow at edge of screen in the direction of baby
+	var arrow_distance = min(screen_size.x, screen_size.y) / 2 - 60  # 60px from edge
+	var screen_offset = direction * arrow_distance
+
+	# Convert to screen coordinates
+	var arrow = $UI/BabyArrow
+	arrow.position = screen_size / 2 + screen_offset
+	arrow.rotation = angle
 
 func _on_camera_lost():
 	# Baby wandered out of view
