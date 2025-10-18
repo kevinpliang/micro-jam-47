@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://blx8s7qhyktt7"
+path="res://.godot/imported/Savannah Sprint.mp3-cc49142e52c1fefe636015017e3e7e03.mp3str"
+
+[deps]
+
+source_file="res://resources/music/Savannah Sprint.mp3"
+dest_files=["res://.godot/imported/Savannah Sprint.mp3-cc49142e52c1fefe636015017e3e7e03.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
