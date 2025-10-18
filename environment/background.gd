@@ -1,48 +1,52 @@
 extends Node2D
 
-@export var tile_size: int = 100  # Smaller tiles for finer detail
-@export var render_distance: int = 20  # More tiles to cover screen
+@export var tile_size: int = 150  # Medium-sized tiles for finer detail
 
 var player: Node2D
 var tiles: Dictionary = {}  # Track spawned tiles
-var last_center_tile: Vector2i = Vector2i(999999, 999999)  # Track last update position
+var screen_size: Vector2
 var grass_colors = [
-	Color(0.45, 0.65, 0.25),  # Dark green
-	Color(0.5, 0.7, 0.3),     # Medium dark green
-	Color(0.55, 0.75, 0.35),  # Medium green
-	Color(0.6, 0.8, 0.4),     # Medium light green
-	Color(0.65, 0.85, 0.45),  # Light green
-	Color(0.7, 0.9, 0.5),     # Very light green
+	Color(0.75, 0.65, 0.35),  # Dry grass tan
+	Color(0.80, 0.70, 0.40),  # Golden savannah
+	Color(0.70, 0.60, 0.30),  # Darker brown
+	Color(0.85, 0.75, 0.45),  # Light sandy
+	Color(0.78, 0.68, 0.38),  # Medium tan
+	Color(0.82, 0.72, 0.42),  # Warm gold
 ]
 
 func _ready():
 	# Find player to follow
 	await get_tree().process_frame
 	player = get_parent().get_node("PlayerElephant")
+	screen_size = get_viewport_rect().size
 
 func _process(_delta):
 	if player:
+		# Update tiles every frame for instant loading
 		_update_tiles()
 
 func _update_tiles():
-	# Calculate which tiles should be visible
+	# Calculate which tiles should be visible based on actual camera bounds
 	var camera_pos = player.position
-	var center_tile_x = int(camera_pos.x / tile_size)
-	var center_tile_y = int(camera_pos.y / tile_size)
-	var center_tile = Vector2i(center_tile_x, center_tile_y)
 
-	# Only update if we've moved to a new tile (optimization)
-	if center_tile == last_center_tile:
-		return
+	# Camera zoom is 0.4, so visible area is 2.5x larger
+	var zoom_factor = 2.5  # 1 / 0.4
+	var visible_width = screen_size.x * zoom_factor
+	var visible_height = screen_size.y * zoom_factor
 
-	last_center_tile = center_tile
+	# Calculate visible tile bounds with large buffer for preloading
+	var buffer = 5  # Add 5 tiles buffer - preload before visible
+	var left_tile = int((camera_pos.x - visible_width / 2) / tile_size) - buffer
+	var right_tile = int((camera_pos.x + visible_width / 2) / tile_size) + buffer
+	var top_tile = int((camera_pos.y - visible_height / 2) / tile_size) - buffer
+	var bottom_tile = int((camera_pos.y + visible_height / 2) / tile_size) + buffer
 
 	# Track which tiles should exist
 	var new_tiles = {}
 
-	# Generate tiles in a radius around the camera
-	for y in range(center_tile_y - render_distance, center_tile_y + render_distance + 1):
-		for x in range(center_tile_x - render_distance, center_tile_x + render_distance + 1):
+	# Generate only visible tiles - all at once for clean appearance
+	for y in range(top_tile, bottom_tile + 1):
+		for x in range(left_tile, right_tile + 1):
 			var key = Vector2i(x, y)
 			new_tiles[key] = true
 
@@ -57,7 +61,7 @@ func _update_tiles():
 				add_child(rect)
 				tiles[key] = rect
 
-	# Remove tiles that are too far away (batch removal)
+	# Remove tiles that are off-screen - all at once
 	var tiles_to_remove = []
 	for key in tiles.keys():
 		if not new_tiles.has(key):
