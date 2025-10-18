@@ -38,14 +38,14 @@ animations = [{
 size = Vector2(69, 55.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p6w5p"]
-size = Vector2(75, 60)
+size = Vector2(170, 122.5)
 
 [node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant", "friendly"]]
 collision_mask = 0
 script = ExtResource("1_baby")
 
 [node name="Body" type="AnimatedSprite2D" parent="."]
-position = Vector2(-10, -31)
+position = Vector2(-1, -30.000002)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_atetw")
 animation = &"idle"
@@ -56,4 +56,5 @@ shape = SubResource("RectangleShape2D_baby")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(8, 1.25)
 shape = SubResource("RectangleShape2D_p6w5p")

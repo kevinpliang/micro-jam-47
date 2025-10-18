@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cfollower123"]
+[gd_scene load_steps=10 format=3 uid="uid://cfollower123"]
 
 [ext_resource type="Script" uid="uid://b4qvc66dx1j1i" path="res://characters/FollowerElephant.gd" id="1_follower"]
 [ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_hr3ov"]
@@ -44,6 +44,9 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_follower"]
 size = Vector2(105, 82.5)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_cia76"]
+radius = 136.00368
+
 [node name="FollowerElephant" type="CharacterBody2D" groups=["friendly"]]
 collision_mask = 0
 script = ExtResource("1_follower")
@@ -60,4 +63,4 @@ shape = SubResource("RectangleShape2D_follower")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_follower")
+shape = SubResource("CircleShape2D_cia76")
