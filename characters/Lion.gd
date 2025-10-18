@@ -1,7 +1,10 @@
 extends CharacterBody2D
 
 @export var speed: float = 200.0
+@onready var flipper: Node2D = $Flipper
+@onready var body: AnimatedSprite2D = $Flipper/Body
 
+var _facing := 1.0 # remembers last facing when idle
 var baby_elephant: Node2D = null
 var dead = false
 
@@ -18,19 +21,20 @@ func _physics_process(_delta):
 		_change_sprite()
 		
 func _change_sprite():
-	if velocity.x < 0:
-		$Body.flip_h = true
-	elif velocity.x > 0:
-		$Body.flip_h = false
-		
-	if velocity != Vector2.ZERO:
-		$Body.play("run")
-		
-func die():
-	dead = true
-	$Body.play("die")
-	$AnimationPlayer.play("die")
-	
-func _on_animation_player_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "die":
-		queue_free()
+	var desired := absf(flipper.scale.x)
+	if desired == 0.0:
+		desired = 1.0
+
+	if velocity.x < -0.01:
+		_facing = - desired
+	elif velocity.x > 0.01:
+		_facing = desired
+
+	flipper.scale.x = _facing
+
+	if velocity.length_squared() > .0001:
+		if body.animation != "run":
+			body.play('run')
+	else:
+		if body.animation != "idle":
+			body.play("idle")

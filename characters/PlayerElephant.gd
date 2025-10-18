@@ -51,27 +51,28 @@ func _change_sprite():
 
 	flipper.scale.x = _facing
 
-	if velocity != Vector2.ZERO:
-		$Flipper/Body.play("run")
+	if velocity.length_squared() > .0001:
+		if body.animation != "run":
+			body.play('run')
 	else:
-		$Flipper/Body.play("idle")
-
-	# Animations without constant restarting
-	#if velocity.length_squared() > DEADZONE * DEADZONE:
-		#if body.animation != "run":
-			#body.play('run')
-	#else:
-		#if body.animation != "idle":
-			#body.play("idle")
+		if body.animation != "idle":
+			body.play("idle")
 		
+func _get_collision_owner(area: Node) -> CharacterBody2D:
+	var owner := area
+	while owner and not (owner is CharacterBody2D):
+		owner = owner.get_parent()
+	return owner
+
 func _on_area_entered(area):
+	print("somethings in my area")
+	var other := _get_collision_owner(area)
+	if other == null:
+		return
+
 	# Check if we collided with a lion - kill it!
-	if area.get_parent().is_in_group("lion"):
-		var lion = area.get_parent()
-		if lion.has_method("die"):
-			lion.die()
-		area.get_parent().die()
-	elif area.get_parent().is_in_group("baby_elephant"):
-		var baby = area.get_parent()
-		if baby.has_method("bounce_off_player"):
-			baby.bounce_off_player(global_position)
+	if other.is_in_group("lion"):
+		other.queue_free()
+	elif other.is_in_group("baby_elephant"):
+		if other.has_method("bounce_off_player"):
+			other.bounce_off_player(global_position)

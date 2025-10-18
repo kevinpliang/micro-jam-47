@@ -5,6 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://dcfjokvr7xbqu" path="res://characters/assets/BabyElephant/BabyElephantDeath.png" id="2_squko"]
 [ext_resource type="Texture2D" uid="uid://bxrjrf0lf7ynm" path="res://characters/assets/BabyElephant/BabyElephantRun.png" id="3_squko"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
+size = Vector2(69, 55.5)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_lpit7"]
 atlas = ExtResource("3_squko")
 region = Rect2(512, 0, 512, 512)
@@ -43,9 +46,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
-size = Vector2(69, 55.5)
-
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ei6ek"]
 radius = 27.999998
 height = 146.0
@@ -70,39 +70,41 @@ height = 102.0
 collision_mask = 0
 script = ExtResource("1_baby")
 
-[node name="Body" type="AnimatedSprite2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_baby")
+
+[node name="Flipper" type="Node2D" parent="."]
+
+[node name="Body" type="AnimatedSprite2D" parent="Flipper"]
 position = Vector2(0.0079956055, -33.992004)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_atetw")
 animation = &"die"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-shape = SubResource("RectangleShape2D_baby")
-
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="Flipper"]
 position = Vector2(1.0079956, -3.9920044)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(35, -36)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_ei6ek")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(-92, 25)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_squko")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(-5, 14)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_lpit7")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(39, -31)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_e2qlu")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(71, -11)
 shape = SubResource("CapsuleShape2D_atetw")

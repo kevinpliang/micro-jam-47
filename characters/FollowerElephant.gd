@@ -1,25 +1,33 @@
 extends CharacterBody2D
 
-@export var follow_speed: float = 300.0  # Match player elephant speed
-@export var stop_distance: float = 20.0  # Stop when very close (almost on top)
-@export var base_spacing_distance: float = 45.0  # Base spacing for first follower - tight group
-
+@export var follow_speed: float = 300.0 # Match player elephant speed
+@export var stop_distance: float = 20.0 # Stop when very close (almost on top)
+@export var base_spacing_distance: float = 45.0 # Base spacing for first follower - tight group
+@onready var flipper: Node2D = $Flipper
+@onready var body: AnimatedSprite2D = $Flipper/Body
 @export var dash_speed: float = 900.0 # speed of the elephant when it is moving
 
-var target: Node2D = null  # Who to follow (player or another follower)
+var _facing := 1.0 # remembers last facing when idle
+var target: Node2D = null # Who to follow (player or another follower)
 var is_activated: bool = false
-var chain_position: int = 0  # Position in the follower chain (0 = first follower)
-var spacing_distance: float = 80.0  # Actual spacing (calculated based on chain position)
+var chain_position: int = 0 # Position in the follower chain (0 = first follower)
+var spacing_distance: float = 80.0 # Actual spacing (calculated based on chain position)
 
 # States: "inactive", "in_group", "deployed", "returning"
 var state: String = "inactive"
-var deployed_position: Vector2 = Vector2.ZERO  # Where follower was sent
-var has_been_activated_before: bool = false  # Track if ever joined group
+var deployed_position: Vector2 = Vector2.ZERO # Where follower was sent
+var has_been_activated_before: bool = false # Track if ever joined group
 
 func _ready():
 	# Connect area detection to activate on player touch
-	$Area2D.area_entered.connect(_on_area_entered)
-	$Body.play("idle")
+	$Flipper/Area2D.area_entered.connect(_on_area_entered)
+	$Flipper/Body.play("idle")
+
+func _get_collision_owner(area: Node) -> CharacterBody2D:
+	var owner := area
+	while owner and not (owner is CharacterBody2D):
+		owner = owner.get_parent()
+	return owner
 
 func _physics_process(_delta):
 	if state == "inactive":
@@ -46,7 +54,7 @@ func _physics_process(_delta):
 
 	if state == "returning":
 		# Move directly to player until close enough to rejoin
-		if distance > 60:  # Need to get close to rejoin
+		if distance > 60: # Need to get close to rejoin
 			var direction = (target_pos - my_pos).normalized()
 			velocity = direction * follow_speed
 			move_and_slide()
@@ -79,27 +87,37 @@ func _physics_process(_delta):
 	_change_sprite()
 
 func _change_sprite():
-	if velocity.x < 0:
-		$Body.flip_h = true
-	elif velocity.x > 0:
-		$Body.flip_h = false
-		
-	if velocity != Vector2.ZERO:
-		$Body.play("run")
+	var desired := absf(flipper.scale.x)
+	if desired == 0.0:
+		desired = 1.0
+
+	if velocity.x < -0.01:
+		_facing = - desired
+	elif velocity.x > 0.01:
+		_facing = desired
+
+	flipper.scale.x = _facing
+
+	if velocity.length_squared() > .0001:
+		if body.animation != "run":
+			body.play('run')
 	else:
-		$Body.play("idle")
+		if body.animation != "idle":
+			body.play("idle")
 
 func _on_area_entered(area):
+	var other := _get_collision_owner(area)
+	if other == null:
+		return
+
 	# Check if player touched us (only works for never-activated followers)
-	if state == "inactive" and not has_been_activated_before:
-		var parent = area.get_parent()
-		if parent and parent.name == "PlayerElephant":
-			# Notify level to add us to the chain
-			if get_parent().has_method("add_follower_to_chain"):
-				get_parent().add_follower_to_chain(self)
+	if state == "inactive" and not has_been_activated_before and other.name == "PlayerElephant":
+		# Notify level to add us to the chain
+		if get_parent().has_method("add_follower_to_chain"):
+			get_parent().add_follower_to_chain(self)
+
 	# If a lion touches a follower, destroy the lion (same as player)
-	var other = area.get_parent()
-	if other and other.is_in_group("lion") and state != "inactive":
+	if other.is_in_group("lion") and state != "inactive":
 		other.queue_free()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
@@ -115,8 +133,8 @@ func activate(player_ref: Node2D, chain_pos: int = 0):
 	spacing_distance = base_spacing_distance * pow(0.5, chain_position)
 
 	# Change color when activated - darker for followers further back
-	var darkness = 1.0 - (chain_position * 0.05)  # Gradual darkening
-	$Body.modulate = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
+	var darkness = 1.0 - (chain_position * 0.05) # Gradual darkening
+	$Flipper/Body.modulate = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
 
 func deploy_to_position(pos: Vector2):
 	# Send this follower to a position on the map
@@ -125,7 +143,7 @@ func deploy_to_position(pos: Vector2):
 	target = null
 
 	# Make them a different color when deployed
-	$Body.modulate = Color(0.8, 0.6, 0.4, 1)  # Brownish to show they're independent
+	$Flipper/Body.modulate = Color(0.8, 0.6, 0.4, 1) # Brownish to show they're independent
 
 func recall():
 	# Call this follower back to the group

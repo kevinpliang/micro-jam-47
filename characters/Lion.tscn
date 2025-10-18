@@ -4,6 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://b086q46a88xyg" path="res://characters/assets/Lion/Lion Run.png" id="2_fvjyx"]
 [ext_resource type="Texture2D" uid="uid://bvq16f1xmbpmj" path="res://characters/assets/Lion/LionDeath.png" id="2_lk2mo"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lion"]
+size = Vector2(68, 48)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_lk2mo"]
 atlas = ExtResource("2_fvjyx")
 region = Rect2(0, 0, 512, 512)
@@ -40,9 +43,6 @@ animations = [{
 "name": &"run",
 "speed": 6.0
 }]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lion"]
-size = Vector2(68, 48)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fvjyx"]
 radius = 20.0
@@ -95,30 +95,32 @@ _data = {
 [node name="Lion" type="CharacterBody2D" groups=["lion"]]
 script = ExtResource("1_lion")
 
-[node name="Body" type="AnimatedSprite2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(4.567993, -4.432007)
+shape = SubResource("RectangleShape2D_lion")
+
+[node name="Flipper" type="Node2D" parent="."]
+
+[node name="Body" type="AnimatedSprite2D" parent="Flipper"]
 position = Vector2(-9.432007, -16.432007)
 scale = Vector2(0.678, 0.678)
 sprite_frames = SubResource("SpriteFrames_lk2mo")
 animation = &"die"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(4.567993, -4.432007)
-shape = SubResource("RectangleShape2D_lion")
-
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="Flipper"]
 position = Vector2(4.567993, -4.432007)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(-138, 24)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_fvjyx")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(12, 2)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_lk2mo")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(-84, 67)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_b5ovh")

@@ -4,12 +4,15 @@ extends CharacterBody2D
 @export var min_move_distance: float = 600.0 # Much longer distances
 @export var max_move_distance: float = 1200.0 # Very long distances
 @export var arrival_threshold: float = 100.0 # Larger threshold
-@export var bounce_impulse: float = 750.0
-@export var bounce_decay_rate: float = 2.0
+@export var bounce_impulse: float = 1200.0
+@export var bounce_decay_rate: float = 1.0
 @export var avoidance_angle_degrees: float = 45.0 # Don't pick directions within this angle toward a lion
 @export var danger_distance: float = 600.0 # Consider lions within this distance when avoiding
 @export var avoidance_attempts: int = 12 # How many random samples to try for a safe direction
+@onready var flipper: Node2D = $Flipper
+@onready var body: AnimatedSprite2D = $Flipper/Body
 
+var _facing := 1.0 # remembers last facing when idle
 var target_position: Vector2
 var knockback_velocity: Vector2 = Vector2.ZERO
 
@@ -21,7 +24,7 @@ func _ready():
 	_pick_new_target()
 
 	# Connect area detection
-	$Area2D.area_entered.connect(_on_area_entered)
+	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 
 func _pick_new_target():
 	# Try to pick a random position that's a good distance away
@@ -84,17 +87,36 @@ func _physics_process(delta):
 	var decay = clamp(bounce_decay_rate * delta, 0.0, 1.0)
 	knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, decay)
 	
-func _change_sprite():
-	if velocity.x < 0:
-		$Body.flip_h = true
-	elif velocity.x > 0:
-		$Body.flip_h = false
+# func _change_sprite():
+# 	if velocity.x < 0:
+# 		$Body.flip_h = true
+# 	elif velocity.x > 0:
+# 		$Body.flip_h = false
 		
-	if velocity != Vector2.ZERO:
-		$Body.play("run")
-	else:
-		$Body.play("idle")
+# 	if velocity != Vector2.ZERO:
+# 		$Body.play("run")
+# 	else:
+# 		$Body.play("idle")
 
+func _change_sprite():
+	var desired := absf(flipper.scale.x)
+	if desired == 0.0:
+		desired = 1.0
+
+	if velocity.x < -0.01:
+		_facing = - desired
+	elif velocity.x > 0.01:
+		_facing = desired
+
+	flipper.scale.x = _facing
+
+	if velocity.length_squared() > .0001:
+		if body.animation != "run":
+			body.play('run')
+	else:
+		if body.animation != "idle":
+			body.play("idle")
+		
 func _on_area_entered(area):
 	# Check if we collided with a lion
 	if area.get_parent().is_in_group("lion"):
@@ -103,6 +125,7 @@ func _on_area_entered(area):
 		set_physics_process(false)
 
 func bounce_off_player(player_position: Vector2):
+	print('im bouncy')
 	var away = global_position - player_position
 	if away.length_squared() == 0.0:
 		away = Vector2.RIGHT
