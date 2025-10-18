@@ -1,4 +1,4 @@
-extends Control
+extends CanvasLayer
 
 @onready var resume_button = $MarginContainer/VBoxContainer/Resume
 @onready var menu_button = $MarginContainer/VBoxContainer/MainMenu

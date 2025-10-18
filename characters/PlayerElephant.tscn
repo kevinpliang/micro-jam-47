@@ -8,13 +8,13 @@
 atlas = ExtResource("3_joyqf")
 region = Rect2(0, 0, 512, 512)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hb80a"]
-atlas = ExtResource("3_joyqf")
-region = Rect2(512, 0, 512, 512)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_33fq1"]
 atlas = ExtResource("3_joyqf")
 region = Rect2(1024, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hb80a"]
+atlas = ExtResource("3_joyqf")
+region = Rect2(512, 0, 512, 512)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_joyqf"]
 animations = [{
@@ -31,10 +31,10 @@ animations = [{
 "texture": SubResource("AtlasTexture_joyqf")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_hb80a")
+"texture": SubResource("AtlasTexture_33fq1")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_33fq1")
+"texture": SubResource("AtlasTexture_hb80a")
 }],
 "loop": true,
 "name": &"run",
