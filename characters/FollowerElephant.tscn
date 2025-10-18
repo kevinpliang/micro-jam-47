@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfollower123"]
+
+[ext_resource type="Script" path="res://characters/FollowerElephant.gd" id="1_follower"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_follower"]
+size = Vector2(105, 82.5)
+
+[node name="FollowerElephant" type="CharacterBody2D" groups=["friendly"]]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_follower")
+
+[node name="Body" type="ColorRect" parent="."]
+offset_left = -52.5
+offset_top = -41.25
+offset_right = 52.5
+offset_bottom = 41.25
+color = Color(0.6, 0.75, 0.6, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_follower")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_follower")
