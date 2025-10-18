@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwuqwgxw6o2xk"
-path="res://.godot/imported/LionRun.png-bf0bab5c4932efeeeabd24fc623014cd.ctex"
+uid="uid://b086q46a88xyg"
+path="res://.godot/imported/Lion Run.png-c8be447864137da9ba0bc8690e2cabfd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://characters/assets/Lion/LionRun.png"
-dest_files=["res://.godot/imported/LionRun.png-bf0bab5c4932efeeeabd24fc623014cd.ctex"]
+source_file="res://characters/assets/Lion/Lion Run.png"
+dest_files=["res://.godot/imported/Lion Run.png-c8be447864137da9ba0bc8690e2cabfd.ctex"]
 
 [params]
 

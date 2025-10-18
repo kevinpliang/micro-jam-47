@@ -1,17 +1,35 @@
-[gd_scene load_steps=8 format=3 uid="uid://dvn8rqtnwi647"]
+[gd_scene load_steps=9 format=3 uid="uid://dvn8rqtnwi647"]
 
 [ext_resource type="Script" uid="uid://g1i2guqas66r" path="res://characters/Lion.gd" id="1_lion"]
-[ext_resource type="Texture2D" uid="uid://dwuqwgxw6o2xk" path="res://characters/assets/Lion/LionRun.png" id="2_fvjyx"]
+[ext_resource type="Texture2D" uid="uid://b086q46a88xyg" path="res://characters/assets/Lion/Lion Run.png" id="2_fvjyx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lk2mo"]
+atlas = ExtResource("2_fvjyx")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b5ovh"]
+atlas = ExtResource("2_fvjyx")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_07p6k"]
+atlas = ExtResource("2_fvjyx")
+region = Rect2(1024, 0, 512, 512)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_lk2mo"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_fvjyx")
+"texture": SubResource("AtlasTexture_lk2mo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b5ovh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_07p6k")
 }],
 "loop": true,
 "name": &"run",
-"speed": 5.0
+"speed": 6.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lion"]
@@ -33,16 +51,18 @@ height = 88.0
 script = ExtResource("1_lion")
 
 [node name="Body" type="AnimatedSprite2D" parent="."]
-position = Vector2(-14, -12)
-scale = Vector2(0.6, 0.6)
+position = Vector2(-16.399994, -133.4)
+scale = Vector2(0.678, 0.678)
 sprite_frames = SubResource("SpriteFrames_lk2mo")
 animation = &"run"
+frame_progress = 0.702439
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
+position = Vector2(-2.399994, -121.399994)
 shape = SubResource("RectangleShape2D_lion")
 
 [node name="Area2D" type="Area2D" parent="."]
+position = Vector2(-2.399994, -121.399994)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(-138, 24)

@@ -22,7 +22,5 @@ func _change_sprite():
 	elif velocity.x > 0:
 		$Body.flip_h = false
 		
-	#if velocity != Vector2.ZERO:
-		#$Body.play("run")
-	#else:
-		#$Body.play("idle")
+	if velocity != Vector2.ZERO:
+		$Body.play("run")

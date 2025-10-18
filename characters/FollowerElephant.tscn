@@ -53,14 +53,17 @@ script = ExtResource("1_follower")
 
 [node name="Body" type="AnimatedSprite2D" parent="."]
 modulate = Color(0.622594, 0.622594, 0.622594, 1)
+position = Vector2(0.0079956055, -124.992004)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_cia76")
 animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.0079956055, -124.992004)
 shape = SubResource("RectangleShape2D_follower")
 
 [node name="Area2D" type="Area2D" parent="."]
+position = Vector2(0.0079956055, -124.992004)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("CircleShape2D_cia76")
