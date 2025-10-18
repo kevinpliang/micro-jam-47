@@ -35,13 +35,14 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
-size = Vector2(46, 37)
+size = Vector2(69, 55.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p6w5p"]
-size = Vector2(50, 40)
+size = Vector2(75, 60)
 
-[node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant"]]
-collision_mask = 2
+[node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant", "friendly"]]
+collision_layer = 1
+collision_mask = 0
 script = ExtResource("1_baby")
 
 [node name="Body" type="AnimatedSprite2D" parent="."]
