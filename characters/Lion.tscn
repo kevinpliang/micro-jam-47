@@ -1,8 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://dvn8rqtnwi647"]
+[gd_scene load_steps=4 format=3 uid="uid://dvn8rqtnwi647"]
 
-[ext_resource type="Script" path="res://characters/Lion.gd" id="1_lion"]
+[ext_resource type="Script" uid="uid://g1i2guqas66r" path="res://characters/Lion.gd" id="1_lion"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lion"]
+size = Vector2(68, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7lyq2"]
 size = Vector2(70, 50)
 
 [node name="Lion" type="CharacterBody2D" groups=["lion"]]
@@ -21,4 +24,4 @@ shape = SubResource("RectangleShape2D_lion")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_lion")
+shape = SubResource("RectangleShape2D_7lyq2")

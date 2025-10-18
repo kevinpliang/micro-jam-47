@@ -1,11 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://cvn8rqtnwi646"]
+[gd_scene load_steps=4 format=3 uid="uid://cvn8rqtnwi646"]
 
 [ext_resource type="Script" uid="uid://sn2y8firyy8d" path="res://characters/BabyElephant.gd" id="1_baby"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
+size = Vector2(46, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p6w5p"]
 size = Vector2(50, 40)
 
 [node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant"]]
+collision_mask = 2
 script = ExtResource("1_baby")
 
 [node name="Body" type="ColorRect" parent="."]
@@ -21,4 +25,4 @@ shape = SubResource("RectangleShape2D_baby")
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-shape = SubResource("RectangleShape2D_baby")
+shape = SubResource("RectangleShape2D_p6w5p")
