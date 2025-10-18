@@ -38,6 +38,18 @@ func _physics_process(delta):
 	# Always move towards target (continuous movement)
 	velocity = direction * speed
 	move_and_slide()
+	_change_sprite()
+	
+func _change_sprite():
+	if velocity.x < 0:
+		$Body.flip_h = true
+	elif velocity.x > 0:
+		$Body.flip_h = false
+		
+	if velocity != Vector2.ZERO:
+		$Body.play("run")
+	else:
+		$Body.play("idle")
 
 func _on_area_entered(area):
 	# Check if we collided with a lion
