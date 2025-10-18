@@ -1,0 +1,40 @@
+extends CharacterBody2D
+
+@export var speed: float = 300.0
+@export var click_radius: float = 64.0  # How close to click before considering it reached
+
+var target_position: Vector2
+var has_target: bool = false
+
+func _ready():
+	target_position = position
+
+	# Connect area detection to kill lions
+	$Area2D.area_entered.connect(_on_area_entered)
+
+func _input(event):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			# Set new target position on left click
+			target_position = get_global_mouse_position()
+			has_target = true
+
+func _physics_process(delta):
+	if has_target:
+		var direction = (target_position - position).normalized()
+		var distance = position.distance_to(target_position)
+
+		# If we're close enough to the target, stop moving
+		if distance < click_radius:
+			has_target = false
+			velocity = Vector2.ZERO
+		else:
+			# Move towards target
+			velocity = direction * speed
+
+		move_and_slide()
+
+func _on_area_entered(area):
+	# Check if we collided with a lion - kill it!
+	if area.get_parent().is_in_group("lion"):
+		area.get_parent().queue_free()
