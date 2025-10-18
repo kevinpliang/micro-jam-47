@@ -1,8 +1,12 @@
 extends CharacterBody2D
 
 @export var speed: float = 600.0
-@export var click_radius: float = 64.0  # How close to click before considering it reached
+@export var click_radius: float = 64.0 # How close to click before considering it reached
+@onready var flipper: Node2D = $Flipper
+@onready var body: AnimatedSprite2D = $Flipper/Body # use $Body if it's not under Flipper
 
+var _facing := 1.0 # remembers last facing when idle
+const DEADZONE := 0.01
 var target_position: Vector2
 var has_target: bool = false
 
@@ -10,8 +14,8 @@ func _ready():
 	target_position = position
 
 	# Connect area detection to kill lions
-	$Area2D.area_entered.connect(_on_area_entered)
-	$Body.play("idle")
+	$Flipper/Area2D.area_entered.connect(_on_area_entered)
+	$Flipper/Body.play("idle")
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -37,17 +41,30 @@ func _physics_process(_delta):
 		_change_sprite()
 
 func _change_sprite():
-	if velocity.x < 0:
-		$Body.flip_h = true
-	elif velocity.x > 0:
-		$Body.flip_h = false
-		
-	if velocity != Vector2.ZERO:
-		$Body.play("run")
-	else:
-		$Body.play("idle")
-		
+	var desired := absf(flipper.scale.x)
+	if desired == 0.0:
+		desired = 1.0
 
+	if velocity.x < DEADZONE:
+		_facing = - desired
+	elif velocity.x > DEADZONE:
+		_facing = desired
+
+	flipper.scale.x = _facing
+
+	if velocity != Vector2.ZERO:
+		$Flipper/Body.play("run")
+	else:
+		$Flipper/Body.play("idle")
+
+	# Animations without constant restarting
+	#if velocity.length_squared() > DEADZONE * DEADZONE:
+		#if body.animation != "run":
+			#body.play('run')
+	#else:
+		#if body.animation != "idle":
+			#body.play("idle")
+		
 func _on_area_entered(area):
 	# Check if we collided with a lion - kill it!
 	if area.get_parent().is_in_group("lion"):
