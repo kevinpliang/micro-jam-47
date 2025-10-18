@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dr0gdgaw3u7it"
-path="res://.godot/imported/grass_noise.jpg-3cb34142fc9ef9c6a0a567c8993e9645.ctex"
+uid="uid://dy4gprr4ih2pr"
+path="res://.godot/imported/thumb.png-9da12214e1d26e5ffa6f5c24358e046f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/img/grass_noise.jpg"
-dest_files=["res://.godot/imported/grass_noise.jpg-3cb34142fc9ef9c6a0a567c8993e9645.ctex"]
+source_file="res://resources/img/thumb.png"
+dest_files=["res://.godot/imported/thumb.png-9da12214e1d26e5ffa6f5c24358e046f.ctex"]
 
 [params]
 

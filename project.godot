@@ -13,7 +13,7 @@ config_version=5
 config/name="Micro Jam 47"
 run/main_scene="res://game/Main.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://characters/assets/icon.svg"
+config/icon="uid://dy4gprr4ih2pr"
 
 [autoload]
 
