@@ -96,7 +96,7 @@ func activate(player_ref: Node2D, chain_pos: int = 0):
 
 	# Change color when activated - darker for followers further back
 	var darkness = 1.0 - (chain_position * 0.05)  # Gradual darkening
-	$Body.color = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
+	$Body.modulate = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
 
 func deploy_to_position(pos: Vector2):
 	# Send this follower to a position on the map
@@ -105,7 +105,7 @@ func deploy_to_position(pos: Vector2):
 	target = null
 
 	# Make them a different color when deployed
-	$Body.color = Color(0.8, 0.6, 0.4, 1)  # Brownish to show they're independent
+	$Body.modulate = Color(0.8, 0.6, 0.4, 1)  # Brownish to show they're independent
 
 func recall():
 	# Call this follower back to the group
