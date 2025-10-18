@@ -19,6 +19,7 @@ config/icon="uid://dy4gprr4ih2pr"
 
 Main="*res://game/Main.gd"
 PauseMenu="*res://game/ui/PauseMenu.tscn"
+HerdService="*res://services/herd-service.gd"
 
 [display]
 

@@ -50,7 +50,7 @@ func _physics_process(_delta):
 
 	var target_pos = target.global_position
 	var my_pos = global_position
-	var distance = my_pos.distance_to(target_pos)
+	var distance = my_pos.distance_to(HerdService.get_position(self))
 
 	if state == "returning":
 		# Move directly to player until close enough to rejoin
@@ -69,15 +69,14 @@ func _physics_process(_delta):
 	var min_spacing = spacing_distance - 8
 	var max_spacing = spacing_distance + 8
 
-	# Maintain spacing distance from target
-	if distance > max_spacing:
+	if distance > max_spacing and position.distance_to(HerdService.get_player_position()) > 150 and position.distance_to(HerdService.get_player_position()) > HerdService.get_position(self).distance_to(HerdService.get_player_position()):
 		# Too far - move closer
-		var direction = (target_pos - my_pos).normalized()
+		var direction = (HerdService.get_position(self) - my_pos).normalized()
 		velocity = direction * follow_speed
 		move_and_slide()
-	elif distance < min_spacing:
+	elif distance < min_spacing and position.distance_to(HerdService.get_player_position()) > 150  and position.distance_to(HerdService.get_player_position()) > HerdService.get_position(self).distance_to(HerdService.get_player_position()):
 		# Too close - move away
-		var direction = (my_pos - target_pos).normalized()
+		var direction = (my_pos - HerdService.get_position(self)).normalized()
 		velocity = direction * follow_speed * 0.5
 		move_and_slide()
 	else:

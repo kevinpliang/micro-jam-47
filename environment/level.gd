@@ -71,6 +71,7 @@ func _spawn_elephants():
 
 	# Spawn player elephant offset from baby within the configured radius
 	player_elephant = PlayerElephant.instantiate()
+	Main.player_elephant = player_elephant
 	var player_start_pos = _random_point_within_radius(baby_start_pos, player_spawn_radius, 300.0)
 	player_elephant.position = player_start_pos
 	add_child(player_elephant)

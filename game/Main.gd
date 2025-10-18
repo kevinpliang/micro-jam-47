@@ -1,6 +1,7 @@
 extends Node
 
 var current_scene = null
+var player_elephant = null
 
 enum GameState {
 	MENU, PLAYING, PAUSED
