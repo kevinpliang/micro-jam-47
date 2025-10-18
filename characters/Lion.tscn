@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvn8rqtnwi647"]
+
+[ext_resource type="Script" path="res://characters/Lion.gd" id="1_lion"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lion"]
+size = Vector2(70, 50)
+
+[node name="Lion" type="CharacterBody2D" groups=["lion"]]
+script = ExtResource("1_lion")
+
+[node name="Body" type="ColorRect" parent="."]
+offset_left = -35.0
+offset_top = -25.0
+offset_right = 35.0
+offset_bottom = 25.0
+color = Color(0.9, 0.6, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_lion")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_lion")
