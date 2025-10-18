@@ -4,8 +4,8 @@ extends CharacterBody2D
 @export var min_move_distance: float = 600.0 # Much longer distances
 @export var max_move_distance: float = 1200.0 # Very long distances
 @export var arrival_threshold: float = 100.0 # Larger threshold
-@export var bounce_impulse: float = 1500.0
-@export var bounce_decay_rate: float = 1.0
+@export var bounce_impulse: float = 750.0
+@export var bounce_decay_rate: float = 2.0
 @export var avoidance_angle_degrees: float = 45.0 # Don't pick directions within this angle toward a lion
 @export var danger_distance: float = 600.0 # Consider lions within this distance when avoiding
 @export var avoidance_attempts: int = 12 # How many random samples to try for a safe direction

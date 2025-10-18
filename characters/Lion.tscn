@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dvn8rqtnwi647"]
+[gd_scene load_steps=11 format=3 uid="uid://dvn8rqtnwi647"]
 
 [ext_resource type="Script" uid="uid://g1i2guqas66r" path="res://characters/Lion.gd" id="1_lion"]
 [ext_resource type="Texture2D" uid="uid://b086q46a88xyg" path="res://characters/assets/Lion/Lion Run.png" id="2_fvjyx"]
@@ -51,18 +51,18 @@ height = 88.0
 script = ExtResource("1_lion")
 
 [node name="Body" type="AnimatedSprite2D" parent="."]
-position = Vector2(-16.399994, -133.4)
+position = Vector2(-9.432007, -16.432007)
 scale = Vector2(0.678, 0.678)
 sprite_frames = SubResource("SpriteFrames_lk2mo")
 animation = &"run"
 frame_progress = 0.702439
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-2.399994, -121.399994)
+position = Vector2(4.567993, -4.432007)
 shape = SubResource("RectangleShape2D_lion")
 
 [node name="Area2D" type="Area2D" parent="."]
-position = Vector2(-2.399994, -121.399994)
+position = Vector2(4.567993, -4.432007)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(-138, 24)
