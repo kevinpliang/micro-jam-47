@@ -52,7 +52,7 @@ script = ExtResource("1_follower")
 modulate = Color(0.622594, 0.622594, 0.622594, 1)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_cia76")
-animation = &"run"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_follower")

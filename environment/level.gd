@@ -397,7 +397,7 @@ func _get_follower_at_position(world_pos: Vector2) -> Node2D:
 	for follower in deployed_followers:
 		if is_instance_valid(follower):
 			var distance = follower.global_position.distance_to(world_pos)
-			if distance < 60: # Click tolerance
+			if distance < 150: # Click tolerance
 				return follower
 	return null
 
