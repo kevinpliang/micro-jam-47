@@ -3,10 +3,9 @@ extends CharacterBody2D
 @export var speed: float = 600.0
 @export var click_radius: float = 64.0 # How close to click before considering it reached
 @onready var flipper: Node2D = $Flipper
-@onready var body: AnimatedSprite2D = $Flipper/Body # use $Body if it's not under Flipper
+@onready var body: AnimatedSprite2D = $Flipper/Body
 
 var _facing := 1.0 # remembers last facing when idle
-const DEADZONE := 0.01
 var target_position: Vector2
 var has_target: bool = false
 
@@ -45,9 +44,9 @@ func _change_sprite():
 	if desired == 0.0:
 		desired = 1.0
 
-	if velocity.x < DEADZONE:
+	if velocity.x < -0.01:
 		_facing = - desired
-	elif velocity.x > DEADZONE:
+	elif velocity.x > 0.01:
 		_facing = desired
 
 	flipper.scale.x = _facing
