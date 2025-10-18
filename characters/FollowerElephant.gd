@@ -5,7 +5,7 @@ extends CharacterBody2D
 @export var base_spacing_distance: float = 45.0 # Base spacing for first follower - tight group
 @onready var flipper: Node2D = $Flipper
 @onready var body: AnimatedSprite2D = $Flipper/Body
-@export var dash_speed: float = 900.0 # speed of the elephant when it is moving
+@export var dash_speed: float = 1200.0 # speed of the elephant when it is moving
 
 var _facing := 1.0 # remembers last facing when idle
 var target: Node2D = null # Who to follow (player or another follower)
