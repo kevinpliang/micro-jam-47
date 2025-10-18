@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://cfollower123"]
+
+[ext_resource type="Script" uid="uid://b4qvc66dx1j1i" path="res://characters/FollowerElephant.gd" id="1_follower"]
+[ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_hr3ov"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cia76"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_hr3ov")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_follower"]
+size = Vector2(105, 82.5)
+
+[node name="FollowerElephant" type="CharacterBody2D" groups=["friendly"]]
+collision_mask = 0
+script = ExtResource("1_follower")
+
+[node name="Body" type="AnimatedSprite2D" parent="."]
+modulate = Color(0.622594, 0.622594, 0.622594, 1)
+scale = Vector2(0.668, 0.668)
+sprite_frames = SubResource("SpriteFrames_cia76")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_follower")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_follower")

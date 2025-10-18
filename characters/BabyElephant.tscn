@@ -1,23 +1,55 @@
-[gd_scene load_steps=4 format=3 uid="uid://cvn8rqtnwi646"]
+[gd_scene load_steps=9 format=3 uid="uid://cvn8rqtnwi646"]
 
 [ext_resource type="Script" uid="uid://sn2y8firyy8d" path="res://characters/BabyElephant.gd" id="1_baby"]
+[ext_resource type="Texture2D" uid="uid://dw0vyp6sm0wnq" path="res://characters/assets/BabyElephant/BabyElephantIdle.png" id="2_ei6ek"]
+[ext_resource type="Texture2D" uid="uid://bxrjrf0lf7ynm" path="res://characters/assets/BabyElephant/BabyElephantRun.png" id="3_squko"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lpit7"]
+atlas = ExtResource("3_squko")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e2qlu"]
+atlas = ExtResource("3_squko")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_atetw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_ei6ek")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lpit7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e2qlu")
+}],
+"loop": true,
+"name": &"run",
+"speed": 5.0
+}]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
-size = Vector2(46, 37)
+size = Vector2(69, 55.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p6w5p"]
-size = Vector2(50, 40)
+size = Vector2(75, 60)
 
-[node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant"]]
-collision_mask = 2
+[node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant", "friendly"]]
+collision_layer = 1
+collision_mask = 0
 script = ExtResource("1_baby")
 
-[node name="Body" type="ColorRect" parent="."]
-offset_left = -25.0
-offset_top = -20.0
-offset_right = 25.0
-offset_bottom = 20.0
-color = Color(0.9, 0.7, 0.8, 1)
+[node name="Body" type="AnimatedSprite2D" parent="."]
+position = Vector2(-10, -31)
+scale = Vector2(0.668, 0.668)
+sprite_frames = SubResource("SpriteFrames_atetw")
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_baby")
