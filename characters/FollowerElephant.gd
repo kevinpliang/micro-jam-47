@@ -99,7 +99,7 @@ func _on_area_entered(area):
 				get_parent().add_follower_to_chain(self)
 	# If a lion touches a follower, destroy the lion (same as player)
 	var other = area.get_parent()
-	if other and other.is_in_group("lion"):
+	if other and other.is_in_group("lion") and state != "inactive":
 		other.queue_free()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
