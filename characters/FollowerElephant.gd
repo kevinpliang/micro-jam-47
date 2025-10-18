@@ -133,7 +133,7 @@ func activate(player_ref: Node2D, chain_pos: int = 0):
 	spacing_distance = base_spacing_distance * pow(0.5, chain_position)
 
 	# Change color when activated - darker for followers further back
-	var darkness = 1.0 - (chain_position * 0.05) # Gradual darkening
+	var darkness = 1.0
 	$Flipper/Body.modulate = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
 
 func deploy_to_position(pos: Vector2):
