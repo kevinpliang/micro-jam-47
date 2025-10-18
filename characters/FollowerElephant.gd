@@ -4,6 +4,8 @@ extends CharacterBody2D
 @export var stop_distance: float = 20.0  # Stop when very close (almost on top)
 @export var base_spacing_distance: float = 45.0  # Base spacing for first follower - tight group
 
+@export var dash_speed: float = 900.0 # speed of the elephant when it is moving
+
 var target: Node2D = null  # Who to follow (player or another follower)
 var is_activated: bool = false
 var chain_position: int = 0  # Position in the follower chain (0 = first follower)
@@ -27,7 +29,7 @@ func _physics_process(_delta):
 		var distance = global_position.distance_to(deployed_position)
 		if distance > 10:
 			var direction = (deployed_position - global_position).normalized()
-			velocity = direction * follow_speed
+			velocity = direction * dash_speed
 			move_and_slide()
 		else:
 			velocity = Vector2.ZERO
@@ -81,6 +83,10 @@ func _on_area_entered(area):
 			# Notify level to add us to the chain
 			if get_parent().has_method("add_follower_to_chain"):
 				get_parent().add_follower_to_chain(self)
+	# If a lion touches a follower, destroy the lion (same as player)
+	var other = area.get_parent()
+	if other and other.is_in_group("lion"):
+		other.queue_free()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
 	is_activated = true
