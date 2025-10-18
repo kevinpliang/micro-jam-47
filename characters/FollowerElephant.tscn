@@ -1,7 +1,20 @@
-[gd_scene load_steps=5 format=3 uid="uid://cfollower123"]
+[gd_scene load_steps=9 format=3 uid="uid://cfollower123"]
 
 [ext_resource type="Script" uid="uid://b4qvc66dx1j1i" path="res://characters/FollowerElephant.gd" id="1_follower"]
 [ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_hr3ov"]
+[ext_resource type="Texture2D" uid="uid://ncgrb3dj7e4c" path="res://characters/assets/PlayerElephant/PlayerElephantRun.png" id="3_cia76"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lskb2"]
+atlas = ExtResource("3_cia76")
+region = Rect2(0, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m2uku"]
+atlas = ExtResource("3_cia76")
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0es1o"]
+atlas = ExtResource("3_cia76")
+region = Rect2(1024, 0, 512, 512)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_cia76"]
 animations = [{
@@ -10,7 +23,21 @@ animations = [{
 "texture": ExtResource("2_hr3ov")
 }],
 "loop": true,
-"name": &"default",
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lskb2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m2uku")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0es1o")
+}],
+"loop": true,
+"name": &"run",
 "speed": 5.0
 }]
 
@@ -25,6 +52,7 @@ script = ExtResource("1_follower")
 modulate = Color(0.622594, 0.622594, 0.622594, 1)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_cia76")
+animation = &"run"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_follower")

@@ -1,16 +1,20 @@
-[gd_scene load_steps=9 format=3 uid="uid://bvn8rqtnwi645"]
+[gd_scene load_steps=10 format=3 uid="uid://bvn8rqtnwi645"]
 
 [ext_resource type="Script" uid="uid://c6vqd4cfnkekq" path="res://characters/PlayerElephant.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_joyqf"]
-[ext_resource type="Texture2D" uid="uid://dscm6hsyalxvl" path="res://characters/assets/PlayerElephant/PlayerElephantRun.png" id="3_joyqf"]
+[ext_resource type="Texture2D" uid="uid://ncgrb3dj7e4c" path="res://characters/assets/PlayerElephant/PlayerElephantRun.png" id="3_joyqf"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_33fq1"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_joyqf"]
 atlas = ExtResource("3_joyqf")
-region = Rect2(512, 0, 512, 512)
+region = Rect2(0, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hb80a"]
 atlas = ExtResource("3_joyqf")
-region = Rect2(0, 0, 512, 512)
+region = Rect2(512, 0, 512, 512)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_33fq1"]
+atlas = ExtResource("3_joyqf")
+region = Rect2(1024, 0, 512, 512)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_joyqf"]
 animations = [{
@@ -24,10 +28,13 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_33fq1")
+"texture": SubResource("AtlasTexture_joyqf")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_hb80a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_33fq1")
 }],
 "loop": true,
 "name": &"run",
@@ -48,7 +55,7 @@ script = ExtResource("1_player")
 position = Vector2(1, 5)
 scale = Vector2(0.66796875, 0.66796875)
 sprite_frames = SubResource("SpriteFrames_joyqf")
-animation = &"idle"
+animation = &"run"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_player")

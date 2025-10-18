@@ -19,6 +19,7 @@ var has_been_activated_before: bool = false  # Track if ever joined group
 func _ready():
 	# Connect area detection to activate on player touch
 	$Area2D.area_entered.connect(_on_area_entered)
+	$Body.play("idle")
 
 func _physics_process(_delta):
 	if state == "inactive":
@@ -74,6 +75,19 @@ func _physics_process(_delta):
 	else:
 		# In acceptable range - stop completely
 		velocity = Vector2.ZERO
+		
+	_change_sprite()
+
+func _change_sprite():
+	if velocity.x < 0:
+		$Body.flip_h = true
+	elif velocity.x > 0:
+		$Body.flip_h = false
+		
+	if velocity != Vector2.ZERO:
+		$Body.play("run")
+	else:
+		$Body.play("idle")
 
 func _on_area_entered(area):
 	# Check if player touched us (only works for never-activated followers)

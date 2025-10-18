@@ -11,6 +11,7 @@ func _ready():
 
 	# Connect area detection to kill lions
 	$Area2D.area_entered.connect(_on_area_entered)
+	$Body.play("idle")
 
 func _input(event):
 	if event is InputEventMouseButton:
