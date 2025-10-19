@@ -11,7 +11,13 @@ const SAVE_PATH = "user://highscore.bin"
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
 @export var lion_spawn_max_rate: float = 10.0 # Maximum lions spawned per second near the end
 @export var lion_spawn_ramp_ratio: float = 0.95 # Fraction of duration before max spawn rate is reached
-@export var follower_spawn_chance: float = .001 # 1% chance per new tile area
+@export var follower_spawn_interval: float = 30.0 # Guaranteed spawn cadence in seconds
+@export var follower_spawn_chance_interval: float = 5.0 # Interval between chance-based spawn rolls
+@export var follower_spawn_chance: float = 0.15 # Probability applied every chance interval
+@export var follower_spawn_min_distance: float = 1200.0 # Minimum distance from baby for spawns
+@export var follower_spawn_max_distance: float = 2200.0 # Maximum distance from baby for spawns
+@export var follower_spawn_sector_size: float = 400.0 # Grid size used to avoid duplicate spawn regions
+@export var follower_spawn_attempts: int = 8 # Attempts per spawn cycle to find a valid position
 @export var base_pts_per_sec: float = 10.0 # Base score gain per second
 @export var player_elephant_speed: float = 600.0 # Shared speed for player and followers
 @export var player_spawn_radius: float = 500.0
@@ -36,11 +42,10 @@ var game_over_result_label: Label
 @onready var water_arrow: AnimatedSprite2D = $UI/WaterArrow
 var follower_arrow_container: Node2D
 var follower_arrows: Array[AnimatedSprite2D] = []
-var spawned_followers: Dictionary = {} # Track which tiles have spawned followers
+var spawned_followers: Dictionary = {} # Track which sectors have spawned followers
 var followers: Array = [] # Track all active followers
 var activated_followers: int = 0 # Count of followers that have been activated
 var follower_chain_tail: Node2D = null # The last follower in the chain
-var last_baby_tile: Vector2i = Vector2i(999999, 999999) # Track baby's tile position
 var elapsed_time: float = 0.0
 var lion_spawn_stopped: bool = false
 var lion_victory_announced: bool = false
@@ -61,6 +66,8 @@ var upgrade_player_speed_multipler: float = 1.0
 var upgrade_player_size_multiplier: float = 1.0
 var upgrade_follower_size_multiplier: float = 1.0
 var upgrade_baby_speed_multiplier: float = 1.0
+var follower_spawn_timer: float = 0.0
+var follower_spawn_chance_timer: float = 0.0
 
 func _ready():
 	set_process(true)
@@ -103,6 +110,10 @@ func _ready():
 		follower_arrow.hide()
 	if water_arrow:
 		water_arrow.hide()
+	spawned_followers.clear()
+	follower_spawn_timer = follower_spawn_interval
+	follower_spawn_chance_timer = follower_spawn_chance_interval
+	_spawn_initial_follower()
 	$AudioPlayer.stream = AudioStreamOggVorbis.load_from_file("res://resources/music/Deez Nuts.ogg")
 	$AudioPlayer.play()
 
@@ -152,7 +163,7 @@ func _process(delta):
 	# Check if baby is visible in player's camera
 	if baby_elephant and player_elephant:
 		_check_baby_in_view()
-		_check_follower_spawns()
+		_update_follower_spawning(delta)
 		_update_follower_count()
 
 	if is_game_over:
@@ -407,6 +418,9 @@ func _format_score(value: int) -> String:
 func score_tick(score: float, delta: float, base_pts_per_sec: float, followers_with_player: int) -> Array[float]:
 	var t: float = clamp(float(min(followers_with_player, 10)) / 10.0, 0.0, 1.0)
 	var mult: float = 1.0 + 2.0 * pow(t, 1.75)
+	if followers_with_player > 10:
+		var extra_followers: int = followers_with_player - 10
+		mult += 0.1 * float(extra_followers)
 	var new_score: float = score + base_pts_per_sec * mult * delta
 	var result: Array[float] = []
 	result.append(new_score)
@@ -483,62 +497,73 @@ func _on_game_over():
 	resume_after_upgrade()
 	_show_game_over("The lions got the king.")
 
-func _check_follower_spawns():
-	# Check if baby has moved to a new tile region
-	var tile_size = 200 # Match background tile size
-	var baby_pos = baby_elephant.position
-	var current_tile = Vector2i(int(baby_pos.x / tile_size), int(baby_pos.y / tile_size))
+func _spawn_initial_follower() -> void:
+	if player_elephant == null or baby_elephant == null:
+		return
+	_spawn_follower_far_from_player(follower_spawn_attempts * 2)
 
-	# If baby moved to a new tile, potentially spawn followers
-	if current_tile != last_baby_tile:
-		last_baby_tile = current_tile
-		_try_spawn_follower_in_region(current_tile)
+func _update_follower_spawning(delta: float) -> void:
+	if is_game_over:
+		return
+	if player_elephant == null or baby_elephant == null:
+		return
 
-func _try_spawn_follower_in_region(center_tile: Vector2i):
 	_cleanup_followers()
 
-	# Spawn followers ONLY in tiles that are currently OFF-SCREEN
-	var tile_size = 200
-	var camera_pos = player_elephant.position
+	if followers.size() >= max_followers:
+		return
 
-	# Calculate visible area based on the current camera zoom
-	var camera := player_elephant.get_node_or_null("Camera2D") as Camera2D
-	var zoom: Vector2 = Vector2.ONE
-	if camera:
-		zoom = camera.zoom
-	var visible_width = screen_size.x / max(zoom.x, 0.001)
-	var visible_height = screen_size.y / max(zoom.y, 0.001)
+	if follower_spawn_interval > 0.0:
+		follower_spawn_timer -= delta
+		if follower_spawn_timer <= 0.0:
+			var guaranteed_spawned: bool = _spawn_follower_far_from_player()
+			follower_spawn_timer = follower_spawn_interval
+			if not guaranteed_spawned:
+				# Try again soon if we failed to find a slot
+				follower_spawn_timer = min(1.0, follower_spawn_timer)
 
-	# Calculate which tiles are visible
-	var camera_tile_x = int(camera_pos.x / tile_size)
-	var camera_tile_y = int(camera_pos.y / tile_size)
-	var visible_tile_radius_x = int(visible_width / tile_size / 2) + 1
-	var visible_tile_radius_y = int(visible_height / tile_size / 2) + 1
+	if follower_spawn_chance_interval > 0.0:
+		follower_spawn_chance_timer -= delta
+		if follower_spawn_chance_timer <= 0.0:
+			follower_spawn_chance_timer += follower_spawn_chance_interval
+			if randf() < follower_spawn_chance:
+				_spawn_follower_far_from_player()
 
-	# Check tiles in a larger radius around baby
-	var search_radius = 8 # Check further out
+func _spawn_follower_far_from_player(attempts: int = 0) -> bool:
+	var tries: int = attempts
+	if tries <= 0:
+		tries = max(follower_spawn_attempts, 1)
+	for _i in range(tries):
+		var spawn_pos: Vector2 = _pick_follower_spawn_position()
+		if _is_position_visible(spawn_pos):
+			continue
+		if player_elephant.global_position.distance_to(spawn_pos) < max(0.0, follower_spawn_min_distance * 0.75):
+			continue
+		var sector: Vector2i = _chunk_for_position(spawn_pos, follower_spawn_sector_size)
+		if spawned_followers.has(sector):
+			continue
+		if _spawn_follower_at_position(spawn_pos):
+			spawned_followers[sector] = true
+			return true
+	return false
 
-	for dy in range(-search_radius, search_radius + 1):
-		for dx in range(-search_radius, search_radius + 1):
-			var tile_key = Vector2i(center_tile.x + dx, center_tile.y + dy)
+func _pick_follower_spawn_position() -> Vector2:
+	if baby_elephant == null:
+		return Vector2.ZERO
+	var min_dist: float = max(0.0, min(follower_spawn_min_distance, follower_spawn_max_distance))
+	var max_dist: float = max(follower_spawn_min_distance, follower_spawn_max_distance)
+	if max_dist <= min_dist:
+		max_dist = min_dist + 1.0
+	var distance: float = randf_range(min_dist, max_dist)
+	var angle: float = randf() * TAU
+	var origin: Vector2 = baby_elephant.global_position
+	return origin + Vector2(cos(angle), sin(angle)) * distance
 
-			# Skip if already spawned a follower here
-			if spawned_followers.has(tile_key):
-				continue
-
-			# Check if this tile is OFF-SCREEN (not visible by camera)
-			var tile_dist_x = abs(tile_key.x - camera_tile_x)
-			var tile_dist_y = abs(tile_key.y - camera_tile_y)
-
-			# Only spawn if tile is outside visible area
-			if tile_dist_x > visible_tile_radius_x or tile_dist_y > visible_tile_radius_y:
-				# Random chance to spawn
-				if randf() < follower_spawn_chance:
-					if _spawn_follower(tile_key, tile_size):
-						spawned_followers[tile_key] = true
-
-func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
+func _spawn_follower_at_position(position: Vector2) -> bool:
 	_cleanup_followers()
+
+	if followers.size() >= max_followers:
+		return false
 
 	var follower = FollowerElephant.instantiate()
 	if is_instance_valid(player_elephant):
@@ -546,16 +571,22 @@ func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
 	else:
 		follower.follow_speed = player_elephant_speed
 
-	# Spawn at random position within the tile
-	var tile_world_x = tile_pos.x * tile_size
-	var tile_world_y = tile_pos.y * tile_size
-	var spawn_x = tile_world_x + randf_range(20, tile_size - 20)
-	var spawn_y = tile_world_y + randf_range(20, tile_size - 20)
 	follower.scale *= upgrade_follower_size_multiplier
-	follower.position = Vector2(spawn_x, spawn_y)
+	follower.position = position
 	add_child(follower)
 	followers.append(follower)
 	return true
+
+func _is_position_visible(position: Vector2) -> bool:
+	var camera := get_viewport().get_camera_2d()
+	if camera == null:
+		return false
+	var bounds := _calculate_camera_bounds(camera)
+	return bounds.has_point(position)
+
+func _chunk_for_position(position: Vector2, sector_size: float) -> Vector2i:
+	var size := sector_size if sector_size > 0.0 else 200.0
+	return Vector2i(int(floor(position.x / size)), int(floor(position.y / size)))
 
 func _cleanup_followers():
 	for i in range(followers.size() - 1, -1, -1):
