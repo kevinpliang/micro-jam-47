@@ -23,4 +23,4 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 		Main.load_scene("res://environment/level.tscn")
 
 func _on_lion_tree_exited() -> void:
-	$AnimationPlayer.play("label-1")
+	$AnimationPlayer.queue("label-1")
