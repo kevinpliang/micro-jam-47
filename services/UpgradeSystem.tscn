@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cpa8dsr2olbdv"]
+[gd_scene load_steps=3 format=3 uid="uid://cpa8dsr2olbdv"]
 
 [ext_resource type="Script" uid="uid://dpj6a7vsie5b1" path="res://services/upgrade_system.gd" id="1_r4x42"]
+[ext_resource type="AudioStream" uid="uid://d3s3xakobah5e" path="res://audio/upgrade.wav" id="2_yjyg3"]
 
 [node name="Node" type="Node"]
 script = ExtResource("1_r4x42")
@@ -8,3 +9,7 @@ script = ExtResource("1_r4x42")
 [node name="Label" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_yjyg3")
+volume_db = -4.181

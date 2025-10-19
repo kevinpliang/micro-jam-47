@@ -36,6 +36,7 @@ func on_exp_gained(total: int) -> void:
 	if is_showing:
 		return
 	if total_collected >= next_threshold:
+		$AudioStreamPlayer.play()
 		_present_upgrade_menu()
 
 # --- UI CREATION ---
@@ -105,6 +106,7 @@ func _create_ui() -> void:
 # --- BUILD RANDOM OPTIONS ---
 func _populate_random_upgrades() -> void:
 	# Clear previous buttons
+	
 	for child in options_box.get_children():
 		child.queue_free()
 	option_buttons.clear()
@@ -169,8 +171,8 @@ func _populate_random_upgrades() -> void:
 
 # --- PRESENT MENU ---
 func _present_upgrade_menu() -> void:
-	if not overlay:
-		return
+
+	print_debug("upgrade menu")
 
 	_populate_random_upgrades()
 
