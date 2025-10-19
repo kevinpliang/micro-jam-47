@@ -26,7 +26,9 @@ var score_label: Label
 var stopwatch_label: Label
 var game_over_reason_label: Label
 var game_over_time_label: Label
+var game_over_xp_label: Label
 var game_over_score_label: Label
+var game_over_hiscore_label: Label
 var game_over_result_label: Label
 @onready var baby_arrow: AnimatedSprite2D = $UI/BabyArrow
 @onready var follower_arrow: AnimatedSprite2D = $UI/FollowerArrow
@@ -66,8 +68,10 @@ func _ready():
 	score_label = $UI/Score
 	stopwatch_label = $UI/Stopwatch
 	game_over_reason_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ReasonLabel
-	game_over_time_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/TimeLabel
-	game_over_score_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ScoreLabel
+	game_over_time_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer/TimeLabel
+	game_over_xp_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer/XPLabel
+	game_over_score_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer/ScoreLabel
+	game_over_hiscore_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer/HiScoreLabel
 	game_over_result_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ResultLabel
 	is_game_over = false
 	elapsed_time = 0.0
@@ -109,7 +113,6 @@ func _spawn_elephants():
 	baby_elephant = BabyElephant.instantiate()
 	baby_elephant.position = baby_start_pos
 	baby_elephant.game_over.connect(_on_game_over)
-	baby_elephant.camera_lost.connect(_on_camera_lost)
 	add_child(baby_elephant)
 
 	# Spawn player elephant offset from baby within the configured radius
@@ -199,7 +202,7 @@ func _check_for_lion_victory() -> void:
 
 	if _get_active_lion_count() == 0:
 		lion_victory_announced = true
-		_show_game_over("The baby is safe!", true)
+		_show_game_over("The king is safe!", true)
 
 func _get_active_lion_count() -> int:
 	var count: int = 0
@@ -425,20 +428,22 @@ func _show_game_over(reason: String, victory: bool = false):
 	var final_score: int = int(raw_score)
 	if final_score != score:
 		_set_score(final_score)
-	if game_over_result_label:
-		var result_text := "YOU LOSE"
-		var result_color := Color(1.0, 0.3, 0.3)
-		if victory:
-			result_text = "YOU WIN"
-			result_color = Color(0.3, 0.9, 0.3)
-		game_over_result_label.text = result_text
-		game_over_result_label.add_theme_color_override("font_color", result_color)
-	if game_over_reason_label:
-		game_over_reason_label.text = reason
-	if game_over_time_label:
-		game_over_time_label.text = "Time Survived: %s" % _format_time(elapsed_time)
-	if game_over_score_label:
-		game_over_score_label.text = "Score: %s\nLions Defeated: %d" % [_format_score(final_score), lions_defeated]
+		
+	var result_text := "YOU LOSE"
+	var result_color := Color(1.0, 0.3, 0.3)
+	if victory:
+		result_text = "YOU WIN"
+		result_color = Color(0.3, 0.9, 0.3)
+	game_over_result_label.text = result_text
+	game_over_result_label.add_theme_color_override("font_color", result_color)
+	game_over_reason_label.add_theme_color_override("font_color", result_color)
+	
+	game_over_reason_label.text = reason
+	game_over_time_label.text = "%s" % _format_time(elapsed_time)
+	game_over_xp_label.text = str(player_exp)
+	game_over_score_label.text = "%s" % _format_score(final_score)
+	
+	
 	_update_score_label()
 	$GameOverUI.show()
 
@@ -466,12 +471,9 @@ func _on_main_menu_button_pressed():
 	Main.current_state = Main.GameState.MENU
 	Main.load_scene("res://game/ui/MainMenu.tscn")
 
-func _on_camera_lost():
-	_show_game_over("The baby wandered off!")
-
 func _on_game_over():
 	resume_after_upgrade()
-	_show_game_over("The lions got the baby!")
+	_show_game_over("The lions got the king.")
 
 func _check_follower_spawns():
 	# Check if baby has moved to a new tile region
