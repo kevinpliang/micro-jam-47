@@ -50,12 +50,14 @@ var raw_score: float = 0.0
 var score_update_timer: float = 0.0
 var upgrade_system: Node = null
 var total_followers_collected: int = 0
-var base_player_speed: float = 0.0
 var player_speed_multiplier_upgrade: float = 1.0
 var follower_size_multiplier: float = 1.0
 var _tree_paused_before_upgrade: bool = false
 var _state_before_upgrade: int = Main.GameState.PLAYING
 var _upgrade_pause_active: bool = false
+var upgrade_speed_multiplier: float = 1.0
+var upgrade_player_size_multiplier: float = 1.0
+var upgrade_follower_size_multiplier: float = 1.0
 
 func _ready():
 	set_process(true)
@@ -78,7 +80,6 @@ func _ready():
 	lions_defeated = 0
 	total_followers_collected = 0
 	player_speed_multiplier_upgrade = 1.0
-	base_player_speed = player_elephant_speed
 	_set_score(0)
 	_update_stopwatch_label()
 	_reset_game_over_ui()
@@ -297,7 +298,7 @@ func _update_follower_arrows(bounds: Rect2, camera: Camera2D) -> void:
 
 	_cleanup_followers()
 	
-	var offscreen_data: Array = []  # Array of {pos, dist}
+	var offscreen_data: Array = [] # Array of {pos, dist}
 	var player_pos: Vector2 = player_elephant.global_position
 
 	for follower in followers:
@@ -588,18 +589,26 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 			print("Upgrade type not found")
 
 func _apply_speed_upgrade() -> void:
-	player_elephant.speed *= 1.2
+	print('before', player_elephant.speed)
+	upgrade_speed_multiplier += .2
+	var new_speed = player_elephant_speed * upgrade_speed_multiplier
+	player_elephant.speed = new_speed
 	player_elephant.scale_run_speed()
 	for follower in followers:
-		follower.follow_speed *= 1.2
+		follower.follow_speed *= new_speed
+	print('after', player_elephant.speed)
 		
 func _apply_follower_size_upgrade():
-	follower_size_multiplier *= 1.2
+	# follower_size_multiplier += .2
 	for follower in followers:
-		follower.scale *= 1.2
+		print('before', follower.scale)
+		follower.scale += Vector2(.2, .2)
+		print('after', follower.scale)
 			
 func _apply_size_upgrade():
-	player_elephant.scale *= 1.2
+	print('before', player_elephant.scale)
+	player_elephant.scale += Vector2(.2, .2)
+	print('after', player_elephant.scale)
 
 func _apply_water_hitbox_upgrade() -> void:
 	pass

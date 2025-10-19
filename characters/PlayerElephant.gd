@@ -26,7 +26,7 @@ func _input(event):
 			target_position = get_global_mouse_position()
 			var movement_arrow = MovementArrow.instantiate()
 			movement_arrow.position = target_position
-			get_parent().add_child(movement_arrow)			
+			get_parent().add_child(movement_arrow)
 			has_target = true
 
 func _physics_process(_delta):
@@ -65,7 +65,7 @@ func _change_sprite():
 			body.play("idle")
 			
 func scale_run_speed() -> void:
-	$Flipper/Body.speed_scale*=1.2
+	$Flipper/Body.speed_scale += .2
 		
 func _get_collision_owner(area: Node) -> Node:
 	var owner := area
