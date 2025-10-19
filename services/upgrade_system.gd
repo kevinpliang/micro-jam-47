@@ -7,7 +7,7 @@ const ALL_UPGRADES := [
 	{"id": "speed", "title": "Fleet Feet", "description": "+20% movement speed"},
 	{"id": "size", "title": "Huge Heart", "description": "+20% player size"},
 	{"id": "follower_size", "title": "Enlarged Elephants", "description": "+20% follower size"},
-	{"id": "baby_speed", "title": "Lullaby Lull", "description": "-20% baby movement speed"},
+	{"id": "baby_speed", "title": "Lord's Lullaby", "description": "-20% baby movement speed"},
 ]
 
 const GAME_THEME := preload("res://resources/Theme.tres")

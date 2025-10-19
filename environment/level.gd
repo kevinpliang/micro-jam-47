@@ -600,7 +600,7 @@ func _apply_speed_upgrade() -> void:
 	player_elephant.speed = new_speed
 	player_elephant.scale_run_speed()
 	for follower in followers:
-		follower.follow_speed *= new_speed
+		follower.follow_speed = new_speed
 	print('after', player_elephant.speed)
 		
 func _apply_follower_size_upgrade():
