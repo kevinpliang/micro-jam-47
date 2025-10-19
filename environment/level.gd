@@ -13,7 +13,7 @@ const SAVE_PATH = "user://highscore.bin"
 @export var lion_spawn_ramp_ratio: float = 1.00 # Fraction of duration before max spawn rate is reached
 @export var follower_spawn_interval: float = 30.0 # Guaranteed spawn cadence in seconds
 @export var follower_spawn_chance_interval: float = 5.0 # Interval between chance-based spawn rolls
-@export var follower_spawn_chance: float = 0.15 # Probability applied every chance interval
+@export var follower_spawn_chance: float = 0.10 # Probability applied every chance interval
 @export var follower_spawn_min_distance: float = 1200.0 # Minimum distance from baby for spawns
 @export var follower_spawn_max_distance: float = 2200.0 # Maximum distance from baby for spawns
 @export var follower_spawn_sector_size: float = 400.0 # Grid size used to avoid duplicate spawn regions
@@ -633,7 +633,7 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 			print("Upgrade type not found")
 
 func _apply_speed_upgrade() -> void:
-	upgrade_player_speed_multipler += .2
+	upgrade_player_speed_multipler += .1
 	var new_speed = player_elephant_speed * upgrade_player_speed_multipler
 	player_elephant.speed = new_speed
 	player_elephant.scale_run_speed()
@@ -641,12 +641,12 @@ func _apply_speed_upgrade() -> void:
 		follower.follow_speed = new_speed
 		
 func _apply_follower_size_upgrade():
-	upgrade_follower_size_multiplier += .2
+	upgrade_follower_size_multiplier += .1
 	for follower in followers:
-		follower.scale += Vector2(.2, .2)
+		follower.scale += Vector2(.1, .1)
 			
 func _apply_size_upgrade():
-	player_elephant.scale += Vector2(.2, .2)
+	player_elephant.scale += Vector2(.1, .1)
 
 func _apply_baby_speed_upgrade() -> void:
 	if upgrade_baby_speed_multiplier > 0:
