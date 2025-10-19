@@ -1,6 +1,8 @@
 extends CharacterBody2D
 
-@export var speed: float = 60.0 # Slower movement
+@export var speed: float = 250.0 # Slower movement
+const base_speed: float = 250.0
+
 @export var min_move_distance: float = 600.0 # Much longer distances
 @export var max_move_distance: float = 1200.0 # Very long distances
 @export var arrival_threshold: float = 100.0 # Larger threshold

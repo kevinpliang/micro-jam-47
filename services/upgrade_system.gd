@@ -5,9 +5,9 @@ signal upgrade_selected(upgrade_id: String)
 # --- Define your full upgrade pool ---
 const ALL_UPGRADES := [
 	{"id": "speed", "title": "Fleet Feet", "description": "+20% movement speed"},
-	{"id": "size", "title": "Huge Heart", "description": "+20% size"},
+	{"id": "size", "title": "Huge Heart", "description": "+20% player size"},
 	{"id": "follower_size", "title": "Enlarged Elephants", "description": "+20% follower size"},
-	{"id": "water_hitbox", "title": "Bigger Bubbles", "description": "+30% projectile size"},
+	{"id": "baby_speed", "title": "Lullaby Lull", "description": "-20% baby movement speed"},
 ]
 
 const GAME_THEME := preload("res://resources/Theme.tres")
@@ -106,7 +106,6 @@ func _create_ui() -> void:
 # --- BUILD RANDOM OPTIONS ---
 func _populate_random_upgrades() -> void:
 	# Clear previous buttons
-	
 	for child in options_box.get_children():
 		child.queue_free()
 	option_buttons.clear()
@@ -171,7 +170,6 @@ func _populate_random_upgrades() -> void:
 
 # --- PRESENT MENU ---
 func _present_upgrade_menu() -> void:
-
 	print_debug("upgrade menu")
 
 	_populate_random_upgrades()

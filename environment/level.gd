@@ -55,9 +55,10 @@ var follower_size_multiplier: float = 1.0
 var _tree_paused_before_upgrade: bool = false
 var _state_before_upgrade: int = Main.GameState.PLAYING
 var _upgrade_pause_active: bool = false
-var upgrade_speed_multiplier: float = 1.0
+var upgrade_player_speed_multipler: float = 1.0
 var upgrade_player_size_multiplier: float = 1.0
 var upgrade_follower_size_multiplier: float = 1.0
+var upgrade_baby_speed_multiplier: float = 1.0
 
 func _ready():
 	set_process(true)
@@ -586,15 +587,15 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 			_apply_size_upgrade()
 		"follower_size":
 			_apply_follower_size_upgrade()
-		"water_hitbox":
-			_apply_water_hitbox_upgrade()
+		"baby_speed":
+			_apply_baby_speed_upgrade()
 		_:
 			print("Upgrade type not found")
 
 func _apply_speed_upgrade() -> void:
 	print('before', player_elephant.speed)
-	upgrade_speed_multiplier += .2
-	var new_speed = player_elephant_speed * upgrade_speed_multiplier
+	upgrade_player_speed_multipler += .2
+	var new_speed = player_elephant_speed * upgrade_player_speed_multipler
 	player_elephant.speed = new_speed
 	player_elephant.scale_run_speed()
 	for follower in followers:
@@ -613,8 +614,15 @@ func _apply_size_upgrade():
 	player_elephant.scale += Vector2(.2, .2)
 	print('after', player_elephant.scale)
 
-func _apply_water_hitbox_upgrade() -> void:
-	pass
+func _apply_baby_speed_upgrade() -> void:
+	print('baby speed before', baby_elephant.speed)
+	if upgrade_baby_speed_multiplier > 0:
+		upgrade_baby_speed_multiplier -= .20
+		var new_speed = baby_elephant.base_speed * upgrade_baby_speed_multiplier
+		baby_elephant.speed = new_speed
+	else:
+		pass
+	print('after', baby_elephant.speed)
 
 func add_follower_to_chain(follower: Node2D):
 	var is_new_follower: bool = false
