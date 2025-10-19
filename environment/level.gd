@@ -196,7 +196,7 @@ func _check_baby_in_view():
 	else:
 		baby_arrow.hide()
 
-	_update_follower_arrows(bounds, camera)
+	# _update_follower_arrows(bounds, camera)
 
 func _calculate_camera_bounds(camera: Camera2D) -> Rect2:
 	var camera_pos = camera.get_target_position()

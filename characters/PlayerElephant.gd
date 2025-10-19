@@ -5,6 +5,8 @@ extends CharacterBody2D
 @onready var flipper: Node2D = $Flipper
 @onready var body: AnimatedSprite2D = $Flipper/Body
 
+const MovementArrow = preload("res://characters/MovementArrow.tscn")
+
 var _facing := 1.0 # remembers last facing when idle
 var target_position: Vector2
 var has_target: bool = false
@@ -21,6 +23,9 @@ func _input(event):
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			# Set new target position on left click
 			target_position = get_global_mouse_position()
+			var movement_arrow = MovementArrow.instantiate()
+			movement_arrow.position = target_position
+			get_parent().add_child(movement_arrow)			
 			has_target = true
 
 func _physics_process(_delta):
