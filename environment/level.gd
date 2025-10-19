@@ -5,8 +5,11 @@ const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 
-@export var lion_spawn_interval: float = 3.0 # Spawn a lion every 3 seconds
-@export var follower_spawn_chance: float = 0.03 # 3% chance per new tile area
+@export var lion_spawn_duration: float = 600.0 # Seconds before lions stop spawning (10 minutes by default)
+@export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
+@export var lion_spawn_max_rate: float = 10.0 # Maximum lions spawned per second near the end
+@export var lion_spawn_ramp_ratio: float = 0.95 # Fraction of duration before max spawn rate is reached
+@export var follower_spawn_chance: float = 0.01 # 1% chance per new tile area
 @export var base_pts_per_sec: float = 10.0 # Base score gain per second
 @export var player_spawn_radius: float = 500.0
 @export var baby_start_position: Vector2 = Vector2.ZERO
@@ -22,6 +25,7 @@ var stopwatch_label: Label
 var game_over_reason_label: Label
 var game_over_time_label: Label
 var game_over_score_label: Label
+var game_over_result_label: Label
 @onready var baby_arrow: AnimatedSprite2D = $UI/BabyArrow
 var follower_arrow_container: Node2D
 var follower_arrows: Array[AnimatedSprite2D] = []
@@ -32,6 +36,9 @@ var follower_chain_tail: Node2D = null # The last follower in the chain
 var deployed_followers: Array = [] # Track followers that have been deployed
 var last_baby_tile: Vector2i = Vector2i(999999, 999999) # Track baby's tile position
 var elapsed_time: float = 0.0
+var lion_spawn_stopped: bool = false
+var lion_victory_announced: bool = false
+var lions_defeated: int = 0
 var is_game_over: bool = false
 var score: int = 0
 var score_multiplier: float = 1.0
@@ -47,11 +54,16 @@ func _ready():
 	game_over_reason_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ReasonLabel
 	game_over_time_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/TimeLabel
 	game_over_score_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ScoreLabel
+	game_over_result_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ResultLabel
 	is_game_over = false
 	elapsed_time = 0.0
 	score_multiplier = 1.0
 	raw_score = 0.0
 	score_update_timer = 0.0
+	spawn_timer = 0.0
+	lion_spawn_stopped = false
+	lion_victory_announced = false
+	lions_defeated = 0
 	_set_score(0)
 	_update_stopwatch_label()
 	_reset_game_over_ui()
@@ -103,11 +115,13 @@ func _process(delta):
 	elapsed_time += delta
 	_update_stopwatch_label()
 
-	# Lion spawn timer
-	spawn_timer += delta
-	if spawn_timer >= lion_spawn_interval:
-		spawn_timer = 0.0
-		_spawn_lion()
+	if not lion_spawn_stopped and elapsed_time >= lion_spawn_duration:
+		lion_spawn_stopped = true
+
+	_update_lion_spawning(delta)
+
+	if lion_spawn_stopped and not lion_victory_announced:
+		_check_for_lion_victory()
 
 	# Check if baby is visible in player's camera
 	if baby_elephant and player_elephant:
@@ -132,6 +146,54 @@ func _process(delta):
 		if display_target != score:
 			_set_score(display_target)
 
+func _update_lion_spawning(delta: float) -> void:
+	if is_game_over or lion_spawn_stopped:
+		return
+
+	spawn_timer += delta
+	var current_interval: float = maxf(_get_current_lion_spawn_interval(), 0.001)
+
+	while spawn_timer >= current_interval and !lion_spawn_stopped:
+		spawn_timer -= current_interval
+		_spawn_lion()
+		current_interval = maxf(_get_current_lion_spawn_interval(), 0.001)
+
+func _get_current_lion_spawn_interval() -> float:
+	var start_interval: float = maxf(lion_spawn_start_interval, 0.001)
+	var start_rate: float = 1.0 / start_interval
+	var max_rate: float = maxf(lion_spawn_max_rate, start_rate)
+
+	var ramp_target_time: float = lion_spawn_duration * lion_spawn_ramp_ratio
+	if ramp_target_time <= 0.0:
+		return 1.0 / max_rate
+
+	var ramp_progress: float = clampf(elapsed_time / ramp_target_time, 0.0, 1.0)
+	var current_rate: float = lerpf(start_rate, max_rate, ramp_progress)
+
+	return 1.0 / maxf(current_rate, 0.001)
+
+func _check_for_lion_victory() -> void:
+	if is_game_over or lion_victory_announced:
+		return
+
+	if _get_active_lion_count() == 0:
+		lion_victory_announced = true
+		_show_game_over("The baby is safe!", true)
+
+func _get_active_lion_count() -> int:
+	var count: int = 0
+	for node in get_tree().get_nodes_in_group("lion"):
+		if is_instance_valid(node) and node is CharacterBody2D:
+			if node.has_method("is_defeated") and node.is_defeated():
+				continue
+			count += 1
+	return count
+
+func _on_lion_defeated() -> void:
+	lions_defeated += 1
+	if lion_spawn_stopped and not lion_victory_announced:
+		_check_for_lion_victory()
+
 func _exit_tree():
 	# Ensure global player reference doesn't point to a freed instance
 	if Main.player_elephant == player_elephant:
@@ -141,6 +203,7 @@ func _exit_tree():
 
 func _spawn_lion():
 	var lion = Lion.instantiate()
+	lion.lion_defeated.connect(_on_lion_defeated)
 
 	# Spawn off-screen around the player
 	var camera_pos = player_elephant.position
@@ -308,7 +371,7 @@ func score_tick(score: float, delta: float, base_pts_per_sec: float, followers_w
 	result.append(mult)
 	return result
 
-func _show_game_over(reason: String):
+func _show_game_over(reason: String, victory: bool = false):
 	if is_game_over:
 		return
 	is_game_over = true
@@ -324,12 +387,20 @@ func _show_game_over(reason: String):
 	var final_score: int = int(raw_score)
 	if final_score != score:
 		_set_score(final_score)
+	if game_over_result_label:
+		var result_text := "YOU LOSE"
+		var result_color := Color(1.0, 0.3, 0.3)
+		if victory:
+			result_text = "YOU WIN"
+			result_color = Color(0.3, 0.9, 0.3)
+		game_over_result_label.text = result_text
+		game_over_result_label.add_theme_color_override("font_color", result_color)
 	if game_over_reason_label:
 		game_over_reason_label.text = reason
 	if game_over_time_label:
 		game_over_time_label.text = "Time Survived: %s" % _format_time(elapsed_time)
 	if game_over_score_label:
-		game_over_score_label.text = "Score: %s" % _format_score(final_score)
+		game_over_score_label.text = "Score: %s\nLions Defeated: %d" % [_format_score(final_score), lions_defeated]
 	_update_score_label()
 	$GameOverUI.show()
 
@@ -340,7 +411,10 @@ func _reset_game_over_ui():
 	if game_over_time_label:
 		game_over_time_label.text = "Time Survived: %s" % _format_time(0.0)
 	if game_over_score_label:
-		game_over_score_label.text = "Score: %s" % _format_score(0)
+		game_over_score_label.text = "Score: %s\nLions Defeated: %d" % [_format_score(0), 0]
+	if game_over_result_label:
+		game_over_result_label.text = ""
+		game_over_result_label.remove_theme_color_override("font_color")
 	score_multiplier = 1.0
 	raw_score = 0.0
 	score_update_timer = 0.0

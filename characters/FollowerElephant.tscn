@@ -50,7 +50,7 @@ height = 170.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lskb2"]
 radius = 133.0
-height = 274.0
+height = 282.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m2uku"]
 radius = 28.000004
