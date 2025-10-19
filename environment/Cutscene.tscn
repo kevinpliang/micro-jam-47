@@ -297,7 +297,6 @@ position = Vector2(629, -41)
 zoom = Vector2(0.8, 0.8)
 
 [node name="ColorRect" type="ColorRect" parent="."]
-visible = false
 custom_minimum_size = Vector2(20000, 2000)
 anchors_preset = 15
 anchor_right = 1.0
