@@ -18,6 +18,7 @@ var has_been_activated_before: bool = false # Track if ever joined group
 
 func _ready():
 	# Connect area detection to activate on player touch
+	$CollisionShape2D.disabled = true
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
 	
@@ -94,6 +95,7 @@ func _on_area_entered(area):
 		other.die()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
+	$CollisionShape2D.disabled = false
 	is_activated = true
 	has_been_activated_before = true
 	state = "in_group"
