@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bfy2lxov2d2jn"
+path="res://.godot/imported/Deez Nuts.ogg-1921ea6b618e9fa58cefcf907d5c9d51.oggvorbisstr"
+
+[deps]
+
+source_file="res://resources/music/Deez Nuts.ogg"
+dest_files=["res://.godot/imported/Deez Nuts.ogg-1921ea6b618e9fa58cefcf907d5c9d51.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

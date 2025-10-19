@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://c1va6gdikjx07"]
+[gd_scene load_steps=5 format=3 uid="uid://c1va6gdikjx07"]
 
 [ext_resource type="Script" uid="uid://babbcgxinfa82" path="res://game/ui/main_menu.gd" id="1_8wqto"]
 [ext_resource type="Theme" uid="uid://x0f8326gtuqe" path="res://resources/Theme.tres" id="1_ol1tq"]
+[ext_resource type="Texture2D" uid="uid://ksqom1ysqy11" path="res://resources/img/title.png" id="3_hn3j2"]
 
 [sub_resource type="Theme" id="Theme_d1ohb"]
 default_font_size = 32
@@ -19,6 +20,7 @@ script = ExtResource("1_8wqto")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0
+texture = ExtResource("3_hn3j2")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -43,7 +45,7 @@ clip_contents = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = SubResource("Theme_d1ohb")
-theme_override_font_sizes/normal_font_size = 120
+theme_override_font_sizes/normal_font_size = 100
 bbcode_enabled = true
 text = "[center] THE KING'S GUARD"
 fit_content = true

@@ -98,6 +98,8 @@ func _ready():
 		follower_arrow.hide()
 	if water_arrow:
 		water_arrow.hide()
+	$AudioPlayer.stream = AudioStreamOggVorbis.load_from_file("res://resources/music/Deez Nuts.ogg")
+	$AudioPlayer.play()
 
 func _spawn_elephants():
 	# Spawn elephants at configured start positions
