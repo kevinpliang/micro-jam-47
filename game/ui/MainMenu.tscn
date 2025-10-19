@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c1va6gdikjx07"]
+[gd_scene load_steps=7 format=3 uid="uid://c1va6gdikjx07"]
 
 [ext_resource type="Script" uid="uid://babbcgxinfa82" path="res://game/ui/main_menu.gd" id="1_8wqto"]
 [ext_resource type="Theme" uid="uid://x0f8326gtuqe" path="res://resources/Theme.tres" id="1_ol1tq"]
+[ext_resource type="Texture2D" uid="uid://dddu6rrb65vcy" path="res://environment/assets/background/background.png" id="3_6r146"]
 [ext_resource type="Texture2D" uid="uid://ksqom1ysqy11" path="res://resources/img/title.png" id="3_hn3j2"]
+[ext_resource type="FontFile" uid="uid://clx2g5jcw1pi2" path="res://resources/fonts/Barrio-Regular.ttf" id="4_jpgwa"]
 
 [sub_resource type="Theme" id="Theme_d1ohb"]
 default_font_size = 32
@@ -17,6 +19,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_ol1tq")
 script = ExtResource("1_8wqto")
+
+[node name="Parallax2D" type="Parallax2D" parent="."]
+repeat_size = Vector2(1920, 180)
+autoscroll = Vector2(25, 0)
+
+[node name="Sprite2D" type="TextureRect" parent="Parallax2D"]
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("3_6r146")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0
@@ -40,19 +51,27 @@ grow_vertical = 2
 custom_minimum_size = Vector2(1200, 0)
 layout_mode = 2
 
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+
 [node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer"]
 clip_contents = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = SubResource("Theme_d1ohb")
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 40
+theme_override_fonts/normal_font = ExtResource("4_jpgwa")
 theme_override_font_sizes/normal_font_size = 100
 bbcode_enabled = true
-text = "[center] THE KING'S GUARD"
+text = "[center] THE KING'S PARADE"
 fit_content = true
 scroll_active = false
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 100)
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 
 [node name="Play" type="Button" parent="MarginContainer/VBoxContainer"]
