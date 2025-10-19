@@ -263,9 +263,10 @@ theme_override_font_sizes/font_size = 48
 text = "High Score:"
 horizontal_alignment = 2
 
-[node name="HiScoreLabel" type="Label" parent="GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer"]
+[node name="HiScoreLabel" type="RichTextLabel" parent="GameOverUI/Panel/CenterContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/normal_font_size = 48
+bbcode_enabled = true
 text = "0"
 horizontal_alignment = 1
 

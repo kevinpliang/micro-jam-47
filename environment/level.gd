@@ -5,6 +5,7 @@ const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 const UpgradeSystem = preload("res://services/UpgradeSystem.tscn")
+const SAVE_PATH = "user://highscore.bin"
 
 @export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
@@ -28,7 +29,7 @@ var game_over_reason_label: Label
 var game_over_time_label: Label
 var game_over_xp_label: Label
 var game_over_score_label: Label
-var game_over_hiscore_label: Label
+var game_over_hiscore_label: RichTextLabel
 var game_over_result_label: Label
 @onready var baby_arrow: AnimatedSprite2D = $UI/BabyArrow
 @onready var follower_arrow: AnimatedSprite2D = $UI/FollowerArrow
@@ -443,6 +444,13 @@ func _show_game_over(reason: String, victory: bool = false):
 	game_over_xp_label.text = str(player_exp)
 	game_over_score_label.text = "%s" % _format_score(final_score)
 	
+	var highscore = load_highscore()
+	if final_score > highscore:
+		highscore = final_score
+		save_highscore(highscore)
+		highscore = "[rainbow][wave]" + str(highscore)
+	
+	game_over_hiscore_label.text = str(highscore)
 	
 	_update_score_label()
 	$GameOverUI.show()
@@ -677,5 +685,23 @@ func _increase_player_exp(amount: int) -> void:
 	exp_label.text = "XP: " + str(player_exp)
 	upgrade_system.on_exp_gained(player_exp)
 
+
 func _on_audio_player_finished() -> void:
 	$AudioPlayer.play()
+	
+	
+func save_highscore(highscore: int) -> void:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_64(highscore)
+	else:
+		push_warning("Couldn't save highscore file: ", error_string(FileAccess.get_open_error()))
+
+
+func load_highscore() -> int:
+	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file:
+		return file.get_64()
+	else:
+		push_warning("Couldn't load highscore file: ", error_string(FileAccess.get_open_error()))
+		return -1
