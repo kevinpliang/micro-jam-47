@@ -41,6 +41,8 @@ func die():
 		return
 	dead = true
 	lion_defeated.emit()
+	for shape in $Flipper/Area2D.get_children():
+		shape.set_deferred("disabled", true)
 	$Flipper/Body.play("die")
 	$AnimationPlayer.play("die")
 

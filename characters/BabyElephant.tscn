@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cvn8rqtnwi646"]
+[gd_scene load_steps=10 format=3 uid="uid://cvn8rqtnwi646"]
 
 [ext_resource type="Script" uid="uid://sn2y8firyy8d" path="res://characters/BabyElephant.gd" id="1_baby"]
 [ext_resource type="Texture2D" uid="uid://dw0vyp6sm0wnq" path="res://characters/assets/BabyElephant/BabyElephantIdle.png" id="2_ei6ek"]
@@ -46,25 +46,8 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ei6ek"]
-radius = 27.999998
-height = 146.0
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_squko"]
-radius = 13.0
-height = 28.0
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lpit7"]
-radius = 61.0
-height = 160.0
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_e2qlu"]
-radius = 46.0
-height = 134.0
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_atetw"]
-radius = 47.0
-height = 102.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_squko"]
+radius = 32.379135
 
 [node name="BabyElephant" type="CharacterBody2D" groups=["baby_elephant", "friendly"]]
 collision_mask = 0
@@ -85,26 +68,5 @@ animation = &"die"
 [node name="Area2D" type="Area2D" parent="Flipper"]
 position = Vector2(1.0079956, -3.9920044)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(35, -36)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_ei6ek")
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(-92, 25)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_squko")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(-5, 14)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_lpit7")
-
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(39, -31)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_e2qlu")
-
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(71, -11)
-shape = SubResource("CapsuleShape2D_atetw")
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Flipper/Area2D"]
+shape = SubResource("CircleShape2D_squko")
