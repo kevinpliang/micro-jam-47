@@ -26,6 +26,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_create_ui()
 	_update_threshold()
+	
+func _process(_delta):
+	if get_parent().get_parent().is_game_over:
+		queue_free()
 
 func initialize(level: Node, ui_parent: CanvasLayer) -> void:
 	level_ref = level
