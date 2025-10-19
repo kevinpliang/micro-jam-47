@@ -5,7 +5,6 @@ extends CharacterBody2D
 @export var base_spacing_distance: float = 45.0 # Base spacing for first follower - tight group
 @onready var flipper: Node2D = $Flipper
 @onready var body: AnimatedSprite2D = $Flipper/Body
-@export var dash_speed: float = 1200.0 # speed of the elephant when it is moving
 
 var _facing := 1.0 # remembers last facing when idle
 var target: Node2D = null # Who to follow (player or another follower)
@@ -13,9 +12,8 @@ var is_activated: bool = false
 var chain_position: int = 0 # Position in the follower chain (0 = first follower)
 var spacing_distance: float = 80.0 # Actual spacing (calculated based on chain position)
 
-# States: "inactive", "in_group", "deployed", "returning"
+# States: "inactive", "in_group"
 var state: String = "inactive"
-var deployed_position: Vector2 = Vector2.ZERO # Where follower was sent
 var has_been_activated_before: bool = false # Track if ever joined group
 
 func _ready():
@@ -30,59 +28,34 @@ func _get_collision_owner(area: Node) -> CharacterBody2D:
 	return owner
 
 func _physics_process(_delta):
-	if state == "inactive":
+	if state != "in_group":
 		return
 
-	if state == "deployed":
-		# Stay at deployed position
-		var distance = global_position.distance_to(deployed_position)
-		if distance > 10:
-			var direction = (deployed_position - global_position).normalized()
-			velocity = direction * dash_speed
-			move_and_slide()
-		else:
-			velocity = Vector2.ZERO
-		return
-
-	# For "in_group" and "returning" states, follow target
 	if target == null or not is_instance_valid(target):
 		return
 
-	var target_pos = target.global_position
-	var my_pos = global_position
-	var distance = my_pos.distance_to(HerdService.get_position(self))
+	var herd_position: Vector2 = HerdService.get_position(self)
+	var my_pos := global_position
+	var distance := my_pos.distance_to(herd_position)
+	var player_position: Vector2 = HerdService.get_player_position()
 
-	if state == "returning":
-		# Move directly to player until close enough to rejoin
-		if distance > 60: # Need to get close to rejoin
-			var direction = (target_pos - my_pos).normalized()
-			velocity = direction * follow_speed
-			move_and_slide()
-		else:
-			# Close enough - rejoin the group
-			if get_parent().has_method("add_follower_to_chain"):
-				get_parent().add_follower_to_chain(self)
-		return
-
-	# "in_group" state - maintain spacing
-	# Define acceptable range for spacing - tighter tolerance for tight group
 	var min_spacing = spacing_distance - 8
 	var max_spacing = spacing_distance + 8
 
-	if distance > max_spacing and position.distance_to(HerdService.get_player_position()) > 150 and position.distance_to(HerdService.get_player_position()) > HerdService.get_position(self).distance_to(HerdService.get_player_position()):
-		# Too far - move closer
-		var direction = (HerdService.get_position(self) - my_pos).normalized()
+	if distance > max_spacing and position.distance_to(player_position) > 150:
+		# Too far - move closer to assigned herd slot
+		var direction = (herd_position - my_pos).normalized()
 		velocity = direction * follow_speed
 		move_and_slide()
-	elif distance < min_spacing and position.distance_to(HerdService.get_player_position()) > 150  and position.distance_to(HerdService.get_player_position()) > HerdService.get_position(self).distance_to(HerdService.get_player_position()):
-		# Too close - move away
-		var direction = (my_pos - HerdService.get_position(self)).normalized()
+	elif distance < min_spacing and position.distance_to(player_position) > 150:
+		# Too close - ease back to maintain spacing
+		var direction = (my_pos - herd_position).normalized()
 		velocity = direction * follow_speed * 0.5
 		move_and_slide()
 	else:
 		# In acceptable range - stop completely
 		velocity = Vector2.ZERO
-		
+
 	_change_sprite()
 
 func _change_sprite():
@@ -134,18 +107,3 @@ func activate(player_ref: Node2D, chain_pos: int = 0):
 	# Change color when activated - darker for followers further back
 	var darkness = 1.0
 	$Flipper/Body.modulate = Color(0.5 * darkness, 0.65 * darkness, 0.5 * darkness, 1)
-
-func deploy_to_position(pos: Vector2):
-	# Send this follower to a position on the map
-	state = "deployed"
-	deployed_position = pos
-	target = null
-
-	# Make them a different color when deployed
-	$Flipper/Body.modulate = Color(0.8, 0.6, 0.4, 1) # Brownish to show they're independent
-
-func recall():
-	# Call this follower back to the group
-	state = "returning"
-	# Target will be set by level when recalling
-	# Color will change back when they rejoin

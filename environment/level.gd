@@ -4,16 +4,18 @@ const PlayerElephant = preload("res://characters/PlayerElephant.tscn")
 const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
+const UpgradeSystem = preload("res://services/upgrade-system.gd")
 
 @export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
 @export var lion_spawn_max_rate: float = 10.0 # Maximum lions spawned per second near the end
 @export var lion_spawn_ramp_ratio: float = 0.95 # Fraction of duration before max spawn rate is reached
-@export var follower_spawn_chance: float = 0.01 # 1% chance per new tile area
+@export var follower_spawn_chance: float = .001 # 1% chance per new tile area
 @export var base_pts_per_sec: float = 10.0 # Base score gain per second
+@export var player_elephant_speed: float = 600.0 # Shared speed for player and followers
 @export var player_spawn_radius: float = 500.0
 @export var baby_start_position: Vector2 = Vector2.ZERO
-@export var max_followers: int = 10
+@export var max_followers: int = 210
 
 var spawn_timer: float = 0.0
 var screen_size: Vector2
@@ -33,7 +35,6 @@ var spawned_followers: Dictionary = {} # Track which tiles have spawned follower
 var followers: Array = [] # Track all active followers
 var activated_followers: int = 0 # Count of followers that have been activated
 var follower_chain_tail: Node2D = null # The last follower in the chain
-var deployed_followers: Array = [] # Track followers that have been deployed
 var last_baby_tile: Vector2i = Vector2i(999999, 999999) # Track baby's tile position
 var elapsed_time: float = 0.0
 var lion_spawn_stopped: bool = false
@@ -44,6 +45,13 @@ var score: int = 0
 var score_multiplier: float = 1.0
 var raw_score: float = 0.0
 var score_update_timer: float = 0.0
+var upgrade_system: Node = null
+var total_followers_collected: int = 0
+var base_player_speed: float = 0.0
+var player_speed_multiplier_upgrade: float = 1.0
+var _tree_paused_before_upgrade: bool = false
+var _state_before_upgrade: int = Main.GameState.PLAYING
+var _upgrade_pause_active: bool = false
 
 func _ready():
 	set_process(true)
@@ -64,6 +72,9 @@ func _ready():
 	lion_spawn_stopped = false
 	lion_victory_announced = false
 	lions_defeated = 0
+	total_followers_collected = 0
+	player_speed_multiplier_upgrade = 1.0
+	base_player_speed = player_elephant_speed
 	_set_score(0)
 	_update_stopwatch_label()
 	_reset_game_over_ui()
@@ -71,14 +82,13 @@ func _ready():
 	follower_arrow_container = Node2D.new()
 	follower_arrow_container.name = "FollowerArrows"
 	$UI.add_child(follower_arrow_container)
+	upgrade_system = UpgradeSystem.new()
+	add_child(upgrade_system)
+	if upgrade_system and upgrade_system.has_method("initialize"):
+		upgrade_system.initialize(self, $UI)
 	if baby_arrow:
 		baby_arrow.hide()
 		baby_arrow.play("default")
-
-func _input(event):
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_handle_right_click(event.position)
 
 func _spawn_elephants():
 	# Spawn elephants at configured start positions
@@ -93,6 +103,7 @@ func _spawn_elephants():
 
 	# Spawn player elephant offset from baby within the configured radius
 	player_elephant = PlayerElephant.instantiate()
+	player_elephant.speed = player_elephant_speed
 	Main.player_elephant = player_elephant
 	var player_start_pos = _random_point_within_radius(baby_start_pos, player_spawn_radius, 300.0)
 	player_elephant.position = player_start_pos
@@ -128,7 +139,6 @@ func _process(delta):
 		_check_baby_in_view()
 		_check_follower_spawns()
 		_update_follower_count()
-		_check_deployed_followers_offscreen()
 
 	if is_game_over:
 		return
@@ -259,7 +269,7 @@ func _check_baby_in_view():
 	else:
 		baby_arrow.hide()
 
-	# _update_follower_arrows(bounds, camera)
+	_update_follower_arrows(bounds, camera)
 
 func _calculate_camera_bounds(camera: Camera2D) -> Rect2:
 	var camera_pos = camera.get_target_position()
@@ -297,6 +307,8 @@ func _update_follower_arrows(bounds: Rect2, camera: Camera2D) -> void:
 
 	for i in range(offscreen_positions.size(), follower_arrows.size()):
 		follower_arrows[i].hide()
+
+	follower_arrow_container.visible = offscreen_positions.size() > 0
 
 func _ensure_follower_arrow_capacity(required: int) -> void:
 	while follower_arrows.size() < required:
@@ -492,6 +504,10 @@ func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
 	_cleanup_followers()
 
 	var follower = FollowerElephant.instantiate()
+	if is_instance_valid(player_elephant):
+		follower.follow_speed = player_elephant.speed
+	else:
+		follower.follow_speed = player_elephant_speed
 
 	# Spawn at random position within the tile
 	var tile_world_x = tile_pos.x * tile_size
@@ -510,17 +526,12 @@ func _cleanup_followers():
 		if !is_instance_valid(follower):
 			followers.remove_at(i)
 
-	for i in range(deployed_followers.size() - 1, -1, -1):
-		var deployed = deployed_followers[i]
-		if !is_instance_valid(deployed):
-			deployed_followers.remove_at(i)
-
 	if follower_chain_tail != null and !is_instance_valid(follower_chain_tail):
 		follower_chain_tail = null
 
 func _update_follower_count():
 	_cleanup_followers()
-	# Count how many followers are currently in the group (not deployed)
+	# Count how many followers are currently in the group
 	var count = 0
 	for follower in followers:
 		if is_instance_valid(follower) and follower.state == "in_group":
@@ -532,20 +543,83 @@ func _update_follower_count():
 		if follower_count_label:
 			follower_count_label.text = str(count)
 
+func pause_for_upgrade() -> void:
+	if _upgrade_pause_active:
+		return
+	_upgrade_pause_active = true
+	_tree_paused_before_upgrade = get_tree().paused
+	_state_before_upgrade = Main.current_state
+	get_tree().paused = true
+	Main.current_state = Main.GameState.UPGRADE
+
+func resume_after_upgrade() -> void:
+	if not _upgrade_pause_active:
+		return
+	get_tree().paused = _tree_paused_before_upgrade
+	if _state_before_upgrade == Main.GameState.UPGRADE:
+		Main.current_state = Main.GameState.PLAYING
+	else:
+		Main.current_state = _state_before_upgrade
+	_upgrade_pause_active = false
+
+func apply_selected_upgrade(upgrade_id: String) -> void:
+	match upgrade_id:
+		"speed":
+			_apply_speed_upgrade()
+		"hitbox":
+			_apply_hitbox_upgrade()
+
+func _apply_speed_upgrade() -> void:
+	player_speed_multiplier_upgrade *= 1.2
+	var new_speed := base_player_speed * player_speed_multiplier_upgrade
+	player_elephant_speed = new_speed
+	if is_instance_valid(player_elephant):
+		player_elephant.speed = new_speed
+	for follower in followers:
+		if is_instance_valid(follower):
+			follower.follow_speed = new_speed
+
+func _apply_hitbox_upgrade() -> void:
+	if !is_instance_valid(player_elephant):
+		return
+	var body_shape := player_elephant.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if body_shape and body_shape.shape:
+		_scale_shape(body_shape.shape, 1.3)
+	var area := player_elephant.get_node_or_null("Flipper/Area2D")
+	if area:
+		for child in area.get_children():
+			var collision_shape := child as CollisionShape2D
+			if collision_shape and collision_shape.shape:
+				_scale_shape(collision_shape.shape, 1.3)
+
+func _scale_shape(shape: Shape2D, factor: float) -> void:
+	if factor <= 0.0 or shape == null:
+		return
+	match shape:
+		RectangleShape2D:
+			shape.size *= factor
+		CapsuleShape2D:
+			shape.radius *= factor
+			shape.height *= factor
+		CircleShape2D:
+			shape.radius *= factor
+
 func add_follower_to_chain(follower: Node2D):
+	var is_new_follower: bool = false
+	if follower and follower.has_method("activate"):
+		is_new_follower = follower.state == "inactive"
+
 	var current_group_count = _count_in_group_followers()
 	if current_group_count >= max_followers and follower.state != "in_group":
-		# If a recalled follower tries to rejoin while the herd is full,
-		# keep them deployed at their current position instead of re-adding.
-		if follower.state == "returning":
-			if !deployed_followers.has(follower):
-				deployed_followers.append(follower)
-			follower.deploy_to_position(follower.global_position)
 		return
 	# Add follower to the end of the chain
-	# Works for both new followers and returning followers
+	# Works for both new followers and existing followers
 	if follower_chain_tail == null:
 		# First follower - follow the player
+		if is_instance_valid(player_elephant):
+			follower.follow_speed = player_elephant.speed
+		else:
+			follower.follow_speed = player_elephant_speed
 		follower.activate(player_elephant, 0)
 		follower_chain_tail = follower
 	else:
@@ -558,36 +632,20 @@ func add_follower_to_chain(follower: Node2D):
 			chain_length += 1
 			current = current.target
 
+		if is_instance_valid(player_elephant):
+			follower.follow_speed = player_elephant.speed
+		else:
+			follower.follow_speed = player_elephant_speed
 		follower.activate(follower_chain_tail, chain_length)
 		follower_chain_tail = follower
 
 	# Immediately update the count display
 	_update_follower_count()
+	if is_new_follower:
+		total_followers_collected += 1
+		if upgrade_system and upgrade_system.has_method("on_unique_follower_collected"):
+			upgrade_system.on_unique_follower_collected(total_followers_collected)
 
-
-func _handle_right_click(screen_pos: Vector2):
-	# Convert screen position to world position
-	var camera = player_elephant.get_node("Camera2D")
-	var world_pos = camera.get_screen_center_position() + (screen_pos - screen_size / 2) / camera.zoom
-
-	# Check if we clicked on a deployed follower
-	var clicked_follower = _get_follower_at_position(world_pos)
-
-	if clicked_follower and clicked_follower.state == "deployed":
-		# Recall this deployed follower
-		_recall_follower(clicked_follower)
-	elif _count_in_group_followers() > 0:
-		# Deploy the last follower in the chain to this position
-		_deploy_last_follower(world_pos)
-
-func _get_follower_at_position(world_pos: Vector2) -> Node2D:
-	# Check if we clicked on a deployed follower
-	for follower in deployed_followers:
-		if is_instance_valid(follower):
-			var distance = follower.global_position.distance_to(world_pos)
-			if distance < 150: # Click tolerance
-				return follower
-	return null
 
 func _count_in_group_followers() -> int:
 	_cleanup_followers()
@@ -597,67 +655,3 @@ func _count_in_group_followers() -> int:
 		if is_instance_valid(follower) and follower.state == "in_group":
 			count += 1
 	return count
-
-func _deploy_last_follower(world_pos: Vector2):
-	# Find the last follower in the chain
-	if follower_chain_tail == null or not is_instance_valid(follower_chain_tail):
-		return
-
-	var follower_to_deploy = follower_chain_tail
-
-	# The new tail is whoever this follower was following
-	var new_tail = follower_to_deploy.target
-
-	# If the new tail is the player, then we're removing the only follower
-	if new_tail == player_elephant:
-		follower_chain_tail = null
-	else:
-		follower_chain_tail = new_tail
-
-	# Deploy the follower
-	follower_to_deploy.deploy_to_position(world_pos)
-	deployed_followers.append(follower_to_deploy)
-
-	# Update count
-	_update_follower_count()
-
-func _recall_follower(follower: Node2D):
-	# Set follower to return to the player
-	follower.recall()
-	follower.target = player_elephant
-
-	# Remove from deployed list
-	deployed_followers.erase(follower)
-
-func _check_deployed_followers_offscreen():
-	# Check if any deployed followers have left the camera view
-	if deployed_followers.is_empty():
-		return
-		
-	var camera = get_viewport().get_camera_2d()
-	var camera_pos = camera.get_target_position()
-
-	var zoom_factor = camera.zoom
-	var visible_width = screen_size.x / zoom_factor.x
-	var visible_height = screen_size.y / zoom_factor.y
-	
-	var half_width = visible_width / 2
-	var half_height = visible_height / 2
-
-	var camera_left = camera_pos.x - half_width
-	var camera_right = camera_pos.x + half_width
-	var camera_top = camera_pos.y - half_height
-	var camera_bottom = camera_pos.y + half_height
-
-	var to_remove = []
-	for follower in deployed_followers:
-		if is_instance_valid(follower):
-			var pos = follower.global_position
-			if pos.x < camera_left or pos.x > camera_right or pos.y < camera_top or pos.y > camera_bottom:
-				# Off screen - remove permanently
-				to_remove.append(follower)
-
-	for follower in to_remove:
-		deployed_followers.erase(follower)
-		followers.erase(follower)
-		follower.queue_free()

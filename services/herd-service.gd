@@ -4,8 +4,8 @@ extends Node
 var player: CharacterBody2D = null
 
 # variables that effect the herd positioning
-@export var level_spacing: float = 200
-@export var inter_level_spacing: float = 400
+@export var level_spacing: float = 150
+@export var inter_level_spacing: float = 150
 @export var arc_degrees: float = 45
 @export var max_position_age: float = 0.25
 @export var invalidate_distance: float = 50
@@ -105,22 +105,27 @@ func _process(delta: float) -> void:
 # favortism towards elephants that are closer to the player?
 
 
-var follower_map: Dictionary[CharacterBody2D, ElephantPosition]
+var follower_map: Dictionary[CharacterBody2D, ElephantPosition] = {}
 	
 var arc_width_multiplier: float = 1.0
 var test_arc_length: float = 500
 
-func get_player_position():
-	return player.position
+func get_player_position() -> Vector2:
+	if player != null and is_instance_valid(player):
+		return player.position
+	return Vector2.ZERO
 
 func get_position(follower: CharacterBody2D) -> Vector2:
+	if player == null or !is_instance_valid(player):
+		return Vector2.ZERO
 	# DEBUG
 	#for i in arcs.size():
 	#	print_debug("arc ", i, " size: ", arcs[i].elephants.size())
 	# use old position
 	if follower_map.has(follower):
-		#print_debug("cache hit")
-		return follower_map.get(follower).position
+		var cached_position: ElephantPosition = follower_map.get(follower)
+		if cached_position != null:
+			return cached_position.position
 		
 	#print_debug("new position")
 	# new position
@@ -153,7 +158,15 @@ func get_position(follower: CharacterBody2D) -> Vector2:
 			#print_debug("breaking")
 			break
 			
-	return follower_map.get(follower).position
+	if follower_map.has(follower):
+		var final_position: ElephantPosition = follower_map.get(follower)
+		if final_position != null:
+			return final_position.position
+
+	if player != null and is_instance_valid(player):
+		return player.position
+
+	return Vector2.ZERO
 
 # math helper functins
 

@@ -57,7 +57,7 @@ radius = 28.000004
 height = 60.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0es1o"]
-size = Vector2(73, 35)
+size = Vector2(208.5, 60.5)
 
 [node name="FollowerElephant" type="CharacterBody2D" groups=["friendly"]]
 collision_mask = 0
@@ -92,5 +92,5 @@ rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_m2uku")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="Flipper/Area2D"]
-position = Vector2(-69, 109)
+position = Vector2(-2.25, 98)
 shape = SubResource("RectangleShape2D_0es1o")

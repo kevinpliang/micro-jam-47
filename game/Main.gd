@@ -5,7 +5,7 @@ var player_elephant = null
 var tutorial_played = false
 
 enum GameState {
-	MENU, PLAYING, PAUSED
+	MENU, PLAYING, PAUSED, UPGRADE
 }
 var current_state: GameState = GameState.MENU
 
