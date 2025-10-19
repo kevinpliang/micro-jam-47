@@ -6,7 +6,8 @@ signal upgrade_selected(upgrade_id: String)
 const ALL_UPGRADES := [
 	{"id": "speed", "title": "Fleet Feet", "description": "+20% movement speed"},
 	{"id": "size", "title": "Huge Heart", "description": "+20% size"},
-	{"id": "water_hitbox", "title": "Bigger Bubbles", "description": "+30% projectile size"}
+	{"id": "follower_size", "title": "Enlarged Elephants", "description": "+20% follower size"},
+	{"id": "water_hitbox", "title": "Bigger Bubbles", "description": "+30% projectile size"},
 ]
 
 const GAME_THEME := preload("res://resources/Theme.tres")

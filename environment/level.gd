@@ -579,6 +579,8 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 			_apply_speed_upgrade()
 		"size":
 			_apply_size_upgrade()
+		"follower_size":
+			_apply_follower_size_upgrade()
 		"water_hitbox":
 			_apply_water_hitbox_upgrade()
 		_:
@@ -589,6 +591,9 @@ func _apply_speed_upgrade() -> void:
 	player_elephant.scale_run_speed()
 	for follower in followers:
 		follower.follow_speed *= 1.2
+		
+func _apply_follower_size_upgrade():
+	pass
 			
 func _apply_size_upgrade():
 	player_elephant.scale.x*=1.2
