@@ -4,9 +4,9 @@ extends Node
 var player: CharacterBody2D = null
 
 # variables that effect the herd positioning
-@export var level_spacing: float = 150
-@export var inter_level_spacing: float = 150
-@export var arc_degrees: float = 90
+@export var level_spacing: float = 200
+@export var inter_level_spacing: float = 400
+@export var arc_degrees: float = 45
 @export var max_position_age: float = 0.25
 @export var invalidate_distance: float = 50
 
