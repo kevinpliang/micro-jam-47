@@ -5,7 +5,7 @@ const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 
-@export var lion_spawn_duration: float = 600.0 # Seconds before lions stop spawning (10 minutes by default)
+@export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
 @export var lion_spawn_max_rate: float = 10.0 # Maximum lions spawned per second near the end
 @export var lion_spawn_ramp_ratio: float = 0.95 # Fraction of duration before max spawn rate is reached
