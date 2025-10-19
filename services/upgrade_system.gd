@@ -7,7 +7,7 @@ const ALL_UPGRADES := [
 	{"id": "speed", "title": "Fleet Feet", "description": "+10% movement speed"},
 	{"id": "size", "title": "Huge Heart", "description": "+10% player size"},
 	{"id": "follower_size", "title": "Enlarged Elephants", "description": "+10% follower size"},
-	{"id": "baby_speed", "title": "Lord's Lullaby", "description": "-20% baby movement speed"},
+	{"id": "baby_speed", "title": "Lord's Lullaby", "description": "-10% baby movement speed"},
 ]
 
 const GAME_THEME := preload("res://resources/Theme.tres")
@@ -108,7 +108,7 @@ func _create_ui() -> void:
 	_set_buttons_disabled(true)
 
 # --- BUILD RANDOM OPTIONS ---
-func _populate_random_upgrades() -> void:
+func _populate_random_upgrades() -> bool:
 	# Clear previous buttons
 	for child in options_box.get_children():
 		child.queue_free()
@@ -116,6 +116,13 @@ func _populate_random_upgrades() -> void:
 
 	# Choose 3 random upgrades
 	var pool = ALL_UPGRADES.duplicate()
+	if level_ref and level_ref.has_method("is_upgrade_available"):
+		for i in range(pool.size() - 1, -1, -1):
+			var upgrade: Dictionary = pool[i] as Dictionary
+			if not level_ref.is_upgrade_available(upgrade["id"]):
+				pool.remove_at(i)
+	if pool.is_empty():
+		return false
 	pool.shuffle()
 	var chosen = pool.slice(0, 3)
 
@@ -171,12 +178,14 @@ func _populate_random_upgrades() -> void:
 		button.pressed.connect(Callable(self, "_on_option_pressed").bind(option["id"]))
 		options_box.add_child(button)
 		option_buttons[option["id"]] = button
+	return true
 		
 var click_block_time := 0.2
 
 # --- PRESENT MENU ---
 func _present_upgrade_menu() -> void:
-	_populate_random_upgrades()
+	if not _populate_random_upgrades():
+		return
 	is_showing = true
 	overlay.visible = true
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP

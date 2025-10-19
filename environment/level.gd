@@ -620,6 +620,13 @@ func resume_after_upgrade() -> void:
 		Main.current_state = _state_before_upgrade
 	_upgrade_pause_active = false
 
+func is_upgrade_available(upgrade_id: String) -> bool:
+	match upgrade_id:
+		"baby_speed":
+			return upgrade_baby_speed_multiplier > 0.1
+		_:
+			return true
+
 func apply_selected_upgrade(upgrade_id: String) -> void:
 	match upgrade_id:
 		"speed":
@@ -650,8 +657,8 @@ func _apply_size_upgrade():
 	player_elephant.scale += Vector2(.1, .1)
 
 func _apply_baby_speed_upgrade() -> void:
-	if upgrade_baby_speed_multiplier > 0:
-		upgrade_baby_speed_multiplier -= .20
+	if upgrade_baby_speed_multiplier > .2:
+		upgrade_baby_speed_multiplier -= .10
 		var new_speed = baby_elephant.base_speed * upgrade_baby_speed_multiplier
 		baby_elephant.speed = new_speed
 	else:
