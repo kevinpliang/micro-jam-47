@@ -13,6 +13,7 @@ var dead = false
 func _ready():
 	# Find the baby elephant in the scene
 	baby_elephant = get_tree().get_first_node_in_group("baby_elephant")
+	$Label.visible = false
 
 func _physics_process(_delta):
 	if baby_elephant and not dead:
@@ -43,6 +44,7 @@ func die():
 	lion_defeated.emit()
 	for shape in $Flipper/Area2D.get_children():
 		shape.set_deferred("disabled", true)
+	$Label.visible = true
 	$Flipper/Body.play("die")
 	$AnimationPlayer.play("die")
 	$AudioStreamPlayer2D.play()

@@ -21,7 +21,7 @@ var spawn_timer: float = 0.0
 var screen_size: Vector2
 var baby_elephant: Node2D
 var player_elephant: Node2D
-var follower_count_label: Label
+var exp_label: Label
 var score_label: Label
 var stopwatch_label: Label
 var game_over_reason_label: Label
@@ -42,6 +42,7 @@ var elapsed_time: float = 0.0
 var lion_spawn_stopped: bool = false
 var lion_victory_announced: bool = false
 var lions_defeated: int = 0
+var player_exp: int
 var is_game_over: bool = false
 var score: int = 0
 var score_multiplier: float = 1.0
@@ -58,7 +59,7 @@ var _upgrade_pause_active: bool = false
 func _ready():
 	set_process(true)
 	screen_size = get_viewport_rect().size
-	follower_count_label = $UI/FollowerCount
+	exp_label = $UI/EXP
 	score_label = $UI/Score
 	stopwatch_label = $UI/Stopwatch
 	game_over_reason_label = $GameOverUI/Panel/CenterContainer/VBoxContainer/ReasonLabel
@@ -207,7 +208,9 @@ func _get_active_lion_count() -> int:
 	return count
 
 func _on_lion_defeated() -> void:
+	print("HELLO?")
 	lions_defeated += 1
+	_increase_player_exp(1)
 	if lion_spawn_stopped and not lion_victory_announced:
 		_check_for_lion_victory()
 
@@ -552,17 +555,6 @@ func _cleanup_followers():
 
 func _update_follower_count():
 	_cleanup_followers()
-	# Count how many followers are currently in the group
-	var count = 0
-	for follower in followers:
-		if is_instance_valid(follower) and follower.state == "in_group":
-			count += 1
-
-	# Update UI follower count display
-	if count != activated_followers:
-		activated_followers = count
-		if follower_count_label:
-			follower_count_label.text = str(count)
 
 func pause_for_upgrade() -> void:
 	if _upgrade_pause_active:
@@ -660,13 +652,6 @@ func add_follower_to_chain(follower: Node2D):
 		follower.activate(follower_chain_tail, chain_length)
 		follower_chain_tail = follower
 
-	# Immediately update the count display
-	_update_follower_count()
-	if is_new_follower:
-		total_followers_collected += 1
-		if upgrade_system and upgrade_system.has_method("on_unique_follower_collected"):
-			upgrade_system.on_unique_follower_collected(total_followers_collected)
-
 
 func _count_in_group_followers() -> int:
 	_cleanup_followers()
@@ -676,3 +661,8 @@ func _count_in_group_followers() -> int:
 		if is_instance_valid(follower) and follower.state == "in_group":
 			count += 1
 	return count
+
+func _increase_player_exp(amount: int) -> void:
+	print(_increase_player_exp)
+	player_exp += amount
+	exp_label.text = "XP: " + str(player_exp)
