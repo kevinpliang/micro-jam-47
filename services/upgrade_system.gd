@@ -168,18 +168,19 @@ func _populate_random_upgrades() -> void:
 		button.pressed.connect(Callable(self, "_on_option_pressed").bind(option["id"]))
 		options_box.add_child(button)
 		option_buttons[option["id"]] = button
+		
+var click_block_time := 0.2
 
 # --- PRESENT MENU ---
 func _present_upgrade_menu() -> void:
 
-	print_debug("upgrade menu")
-
 	_populate_random_upgrades()
-
 	is_showing = true
-	_set_buttons_disabled(false)
 	overlay.visible = true
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_set_buttons_disabled(true) 
+	await get_tree().create_timer(click_block_time).timeout
+	_set_buttons_disabled(false)
 	if level_ref and level_ref.has_method("pause_for_upgrade"):
 		level_ref.pause_for_upgrade()
 

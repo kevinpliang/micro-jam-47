@@ -662,6 +662,8 @@ func _count_in_group_followers() -> int:
 	return count
 
 func _increase_player_exp(amount: int) -> void:
+	if is_game_over:
+		return
 	player_exp += amount
 	exp_label.text = "XP: " + str(player_exp)
 	upgrade_system.on_exp_gained(player_exp)
