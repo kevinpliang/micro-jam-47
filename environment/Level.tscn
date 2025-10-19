@@ -249,3 +249,4 @@ autoplay = "default"
 
 [connection signal="pressed" from="GameOverUI/Panel/CenterContainer/VBoxContainer/ButtonContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="GameOverUI/Panel/CenterContainer/VBoxContainer/ButtonContainer/MainMenuButton" to="." method="_on_main_menu_button_pressed"]
+[connection signal="finished" from="AudioPlayer" to="." method="_on_audio_player_finished"]

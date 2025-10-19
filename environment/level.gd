@@ -470,6 +470,7 @@ func _on_camera_lost():
 	_show_game_over("The baby wandered off!")
 
 func _on_game_over():
+	resume_after_upgrade()
 	_show_game_over("The lions got the baby!")
 
 func _check_follower_spawns():
@@ -664,3 +665,6 @@ func _increase_player_exp(amount: int) -> void:
 	player_exp += amount
 	exp_label.text = "XP: " + str(player_exp)
 	upgrade_system.on_exp_gained(player_exp)
+
+func _on_audio_player_finished() -> void:
+	$AudioPlayer.play()
