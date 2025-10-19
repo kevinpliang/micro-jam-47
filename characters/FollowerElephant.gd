@@ -12,6 +12,10 @@ var is_activated: bool = false
 var chain_position: int = 0 # Position in the follower chain (0 = first follower)
 var spacing_distance: float = 80.0 # Actual spacing (calculated based on chain position)
 
+var current_target: Vector2
+var spawn_target: Vector2
+var patrol_target: Vector2
+
 # States: "inactive", "in_group"
 var state: String = "inactive"
 var has_been_activated_before: bool = false # Track if ever joined group
@@ -21,8 +25,12 @@ func _ready():
 	$CollisionShape2D.disabled = true
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
+	spawn_target = global_position
+	patrol_target = spawn_target + Vector2(300+randi_range(0,200), 300+randi_range(0,200))
+	print(patrol_target)
+	print(spawn_target)
+	current_target = patrol_target
 	
-
 func _get_collision_owner(area: Node) -> CharacterBody2D:
 	var owner := area
 	while owner and not (owner is CharacterBody2D):
@@ -30,33 +38,44 @@ func _get_collision_owner(area: Node) -> CharacterBody2D:
 	return owner
 
 func _physics_process(_delta):
-	if state != "in_group":
-		return
-
-	if target == null or not is_instance_valid(target):
-		return
-
-	var herd_position: Vector2 = HerdService.get_position(self)
 	var my_pos := global_position
-	var distance := my_pos.distance_to(herd_position)
-	var player_position: Vector2 = HerdService.get_player_position()
-
-	var min_spacing = spacing_distance - 8
 	var max_spacing = spacing_distance + 8
+	var min_spacing = spacing_distance - 8
+	
+	if state != "in_group":
+		var distance = my_pos.distance_to(current_target)
+		print_debug(distance)
+		if distance < 10:
+			if my_pos.distance_to(spawn_target) < min_spacing:
+				current_target = patrol_target
+			else:
+				current_target = spawn_target
+		var direction = (current_target - my_pos).normalized()
+		velocity = direction * follow_speed * 0.25
+		move_and_slide()
 
-	if distance > max_spacing and position.distance_to(player_position) > 150:
-		# Too far - move closer to assigned herd slot
-		var direction = (herd_position - my_pos).normalized()
-		velocity = direction * follow_speed
-		move_and_slide()
-	elif distance < min_spacing and position.distance_to(player_position) > 150:
-		# Too close - ease back to maintain spacing
-		var direction = (my_pos - herd_position).normalized()
-		velocity = direction * follow_speed * 0.5
-		move_and_slide()
 	else:
-		# In acceptable range - stop completely
-		velocity = Vector2.ZERO
+
+		if target == null or not is_instance_valid(target):
+			return
+
+		var herd_position: Vector2 = HerdService.get_position(self)
+		var distance := my_pos.distance_to(herd_position)
+		var player_position: Vector2 = HerdService.get_player_position()
+
+		if distance > max_spacing and position.distance_to(player_position) > 150:
+			# Too far - move closer to assigned herd slot
+			var direction = (herd_position - my_pos).normalized()
+			velocity = direction * follow_speed
+			move_and_slide()
+		elif distance < min_spacing and position.distance_to(player_position) > 150:
+			# Too close - ease back to maintain spacing
+			var direction = (my_pos - herd_position).normalized()
+			velocity = direction * follow_speed * 0.5
+			move_and_slide()
+		else:
+			# In acceptable range - stop completely
+			velocity = Vector2.ZERO
 
 	_change_sprite()
 
@@ -95,7 +114,7 @@ func _on_area_entered(area):
 		other.die()
 
 func activate(player_ref: Node2D, chain_pos: int = 0):
-	$CollisionShape2D.disabled = false
+	$CollisionShape2D.set_deferred("disabled", false)
 	is_activated = true
 	has_been_activated_before = true
 	state = "in_group"
