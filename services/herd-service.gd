@@ -118,17 +118,11 @@ func get_player_position() -> Vector2:
 func get_position(follower: CharacterBody2D) -> Vector2:
 	if player == null or !is_instance_valid(player):
 		return Vector2.ZERO
-	# DEBUG
-	#for i in arcs.size():
-	#	print_debug("arc ", i, " size: ", arcs[i].elephants.size())
-	# use old position
 	if follower_map.has(follower):
 		var cached_position: ElephantPosition = follower_map.get(follower)
 		if cached_position != null:
 			return cached_position.position
-		
-	#print_debug("new position")
-	# new position
+
 	for arc in arcs:
 		# attempt to generate 5 random positions inside the current arc
 		for g in range(arcs.size()):
@@ -138,24 +132,20 @@ func get_position(follower: CharacterBody2D) -> Vector2:
 			var valid = true
 			for e in arc.elephants:
 				var distance := point.distance_to(e.position)
-				#print_debug(distance)
 				if distance < inter_level_spacing:
 					valid = false
 			
 			if valid:
-				#print_debug("valid position found in arc: ", g)
 				var position: ElephantPosition = ElephantPosition.new()
 				position.age = Time.get_ticks_msec()
 				position.position = point
 				position.follower_reference = follower
 				
-				# add it to the arc and the map
 				follower_map.set(follower, position)
 				arc.elephants.push_back(position)
 				break
 		
 		if follower_map.has(follower):
-			#print_debug("breaking")
 			break
 			
 	if follower_map.has(follower):

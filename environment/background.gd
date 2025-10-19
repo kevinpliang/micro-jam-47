@@ -1,9 +1,9 @@
 extends Node2D
 
-@export var tile_size: int = 150  # Tile size (used for positioning)
+@export var tile_size: int = 150 # Tile size (used for positioning)
 
 var player: Node2D
-var tiles: Dictionary = {}  # Track spawned tiles
+var tiles: Dictionary = {} # Track spawned tiles
 var screen_size: Vector2
 
 var tile_textures: Array[Texture2D] = []
@@ -72,17 +72,16 @@ func _update_tiles():
 				
 				# --- Vegetation layer ---
 				var rng = RandomNumberGenerator.new()
-				rng.seed = tile_seed  # consistent per tile
-				var veg_count = rng.randi_range(0, 10) 
+				rng.seed = tile_seed # consistent per tile
+				var veg_count = rng.randi_range(0, 10)
 				
 				if veg_count == 0:
 					var veg_sprite = Sprite2D.new()
 					var rand_texture = vegetation_textures[rng.randi_range(0, vegetation_textures.size() - 1)]
-					print(rand_texture.resource_name)
 					veg_sprite.texture = rand_texture
 					
-					veg_sprite.position = sprite.position 
-					if rng.randi_range(0,1):
+					veg_sprite.position = sprite.position
+					if rng.randi_range(0, 1):
 						veg_sprite.flip_h = true
 						
 					veg_sprite.position.y += veg_sprite.texture.get_height() / 2

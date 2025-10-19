@@ -26,9 +26,7 @@ func _ready():
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
 	spawn_target = global_position
-	patrol_target = spawn_target + Vector2(300+randi_range(0,200), 300+randi_range(0,200))
-	print(patrol_target)
-	print(spawn_target)
+	patrol_target = spawn_target + Vector2(300 + randi_range(0, 200), 300 + randi_range(0, 200))
 	current_target = patrol_target
 	
 func _get_collision_owner(area: Node) -> CharacterBody2D:
@@ -44,7 +42,6 @@ func _physics_process(_delta):
 	
 	if state != "in_group":
 		var distance = my_pos.distance_to(current_target)
-		print_debug(distance)
 		if distance < 10:
 			if my_pos.distance_to(spawn_target) < min_spacing:
 				current_target = patrol_target
@@ -55,7 +52,6 @@ func _physics_process(_delta):
 		move_and_slide()
 
 	else:
-
 		if target == null or not is_instance_valid(target):
 			return
 

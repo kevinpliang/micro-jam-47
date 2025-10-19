@@ -9,8 +9,8 @@ const SAVE_PATH = "user://highscore.bin"
 
 @export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
-@export var lion_spawn_max_rate: float = 10.0 # Maximum lions spawned per second near the end
-@export var lion_spawn_ramp_ratio: float = 0.95 # Fraction of duration before max spawn rate is reached
+@export var lion_spawn_max_rate: float = 5.0 # Maximum lions spawned per second near the end
+@export var lion_spawn_ramp_ratio: float = 1.00 # Fraction of duration before max spawn rate is reached
 @export var follower_spawn_interval: float = 30.0 # Guaranteed spawn cadence in seconds
 @export var follower_spawn_chance_interval: float = 5.0 # Interval between chance-based spawn rolls
 @export var follower_spawn_chance: float = 0.15 # Probability applied every chance interval
@@ -254,7 +254,7 @@ func _spawn_lion():
 		zoom = camera.zoom
 	var visible_width = screen_size.x / max(zoom.x, 0.001)
 	var visible_height = screen_size.y / max(zoom.y, 0.001)
-	var spawn_margin = 100 # Extra distance outside view
+	var spawn_margin = 500 # Extra distance outside view
 
 	match edge:
 		0: # Top
@@ -633,36 +633,28 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 			print("Upgrade type not found")
 
 func _apply_speed_upgrade() -> void:
-	print('before', player_elephant.speed)
 	upgrade_player_speed_multipler += .2
 	var new_speed = player_elephant_speed * upgrade_player_speed_multipler
 	player_elephant.speed = new_speed
 	player_elephant.scale_run_speed()
 	for follower in followers:
 		follower.follow_speed = new_speed
-	print('after', player_elephant.speed)
 		
 func _apply_follower_size_upgrade():
 	upgrade_follower_size_multiplier += .2
 	for follower in followers:
-		print('before', follower.scale)
 		follower.scale += Vector2(.2, .2)
-		print('after', follower.scale)
 			
 func _apply_size_upgrade():
-	print('before', player_elephant.scale)
 	player_elephant.scale += Vector2(.2, .2)
-	print('after', player_elephant.scale)
 
 func _apply_baby_speed_upgrade() -> void:
-	print('baby speed before', baby_elephant.speed)
 	if upgrade_baby_speed_multiplier > 0:
 		upgrade_baby_speed_multiplier -= .20
 		var new_speed = baby_elephant.base_speed * upgrade_baby_speed_multiplier
 		baby_elephant.speed = new_speed
 	else:
 		pass
-	print('after', baby_elephant.speed)
 
 func add_follower_to_chain(follower: Node2D):
 	var is_new_follower: bool = false
