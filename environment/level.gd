@@ -6,6 +6,7 @@ const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 const UpgradeSystem = preload("res://services/UpgradeSystem.tscn")
 const SAVE_PATH = "user://highscore.bin"
+const BACKGROUND_MUSIC: AudioStreamOggVorbis = preload("res://resources/music/deez-nuts.ogg")
 
 @export var lion_spawn_duration: float = 180.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
@@ -114,7 +115,7 @@ func _ready():
 	follower_spawn_timer = follower_spawn_interval
 	follower_spawn_chance_timer = follower_spawn_chance_interval
 	_spawn_initial_follower()
-	$AudioPlayer.stream = AudioStreamOggVorbis.load_from_file("res://resources/music/Deez Nuts.ogg")
+	$AudioPlayer.stream = BACKGROUND_MUSIC
 	$AudioPlayer.play()
 
 func _spawn_elephants():

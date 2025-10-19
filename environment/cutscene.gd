@@ -20,7 +20,7 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 		$AnimationPlayer.play("label-2")
 	if anim_name == "label-2":
 		Main.tutorial_played = true
-		Main.load_scene("res://environment/level.tscn")
+		Main.load_scene("res://environment/Level.tscn")
 
 func _on_lion_tree_exited() -> void:
 	$AnimationPlayer.queue("label-1")
