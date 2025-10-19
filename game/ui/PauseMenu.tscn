@@ -8,6 +8,7 @@ default_font_size = 32
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
+layer = 5
 script = ExtResource("1_wcy2j")
 
 [node name="TextureRect" type="ColorRect" parent="."]

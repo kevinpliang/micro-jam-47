@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://ddgnlo0p2flp1"]
+[gd_scene load_steps=11 format=3 uid="uid://ddgnlo0p2flp1"]
 
 [ext_resource type="Script" uid="uid://wpe1mvbakxpw" path="res://environment/level.gd" id="1_u5nnp"]
 [ext_resource type="Script" uid="uid://husd7i7k6syc" path="res://environment/background.gd" id="2_bg"]
@@ -26,6 +26,42 @@ animations = [{
 "name": &"default",
 "speed": 2.0
 }]
+
+[sub_resource type="Animation" id="Animation_rnbyv"]
+resource_name = "default"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("UI/ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0, 0, 0, 1), Color(0, 0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_kwfq0"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("UI/ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 0, 0, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_kbjei"]
+_data = {
+&"RESET": SubResource("Animation_kwfq0"),
+&"default": SubResource("Animation_rnbyv")
+}
 
 [node name="Level" type="Node2D"]
 y_sort_enabled = true
@@ -93,6 +129,14 @@ sprite_frames = SubResource("SpriteFrames_kbjei")
 autoplay = "default"
 frame_progress = 0.70150965
 
+[node name="ColorRect" type="ColorRect" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
 [node name="GameOverUI" type="CanvasLayer" parent="."]
 visible = false
 
@@ -156,6 +200,12 @@ text = "Restart"
 [node name="MainMenuButton" type="Button" parent="GameOverUI/Panel/CenterContainer/VBoxContainer/ButtonContainer"]
 layout_mode = 2
 text = "Main Menu"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_kbjei")
+}
+autoplay = "default"
 
 [connection signal="pressed" from="GameOverUI/Panel/CenterContainer/VBoxContainer/ButtonContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="GameOverUI/Panel/CenterContainer/VBoxContainer/ButtonContainer/MainMenuButton" to="." method="_on_main_menu_button_pressed"]

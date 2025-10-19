@@ -10,6 +10,7 @@ const MovementArrow = preload("res://characters/MovementArrow.tscn")
 var _facing := 1.0 # remembers last facing when idle
 var target_position: Vector2
 var has_target: bool = false
+var in_cutscene = false
 
 func _ready():
 	target_position = position

@@ -6,7 +6,10 @@ func _ready() -> void:
 
 func _on_play_pressed() -> void:
 	Main.current_state = Main.GameState.PLAYING
-	Main.load_scene("res://environment/Level.tscn")
+	if !Main.tutorial_played:
+		Main.load_scene("res://environment/Cutscene.tscn")
+	else:
+		Main.load_scene("res://environment/Level.tscn")
 
 func _on_options_pressed() -> void:
 	Main.load_scene("res://game/ui/OptionsMenu.tscn")
