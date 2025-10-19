@@ -87,17 +87,6 @@ func _physics_process(delta):
 	var decay = clamp(bounce_decay_rate * delta, 0.0, 1.0)
 	knockback_velocity = knockback_velocity.lerp(Vector2.ZERO, decay)
 	
-# func _change_sprite():
-# 	if velocity.x < 0:
-# 		$Body.flip_h = true
-# 	elif velocity.x > 0:
-# 		$Body.flip_h = false
-		
-# 	if velocity != Vector2.ZERO:
-# 		$Body.play("run")
-# 	else:
-# 		$Body.play("idle")
-
 func _change_sprite():
 	var desired := absf(flipper.scale.x)
 	if desired == 0.0:
