@@ -45,6 +45,7 @@ func die():
 		shape.set_deferred("disabled", true)
 	$Flipper/Body.play("die")
 	$AnimationPlayer.play("die")
+	$AudioStreamPlayer2D.play()
 
 func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 	if anim_name == "die":

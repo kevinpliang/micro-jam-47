@@ -120,6 +120,7 @@ func bounce_off_player(player_position: Vector2):
 		away = Vector2.RIGHT
 	knockback_velocity = away.normalized() * bounce_impulse
 	_set_new_target_away_from(player_position)
+	$AudioStreamPlayer2D.play()
 
 func _set_new_target_away_from(origin: Vector2):
 	var away_direction = (global_position - origin).normalized()

@@ -1,8 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://cfollower123"]
+[gd_scene load_steps=14 format=3 uid="uid://cfollower123"]
 
 [ext_resource type="Script" uid="uid://b4qvc66dx1j1i" path="res://characters/FollowerElephant.gd" id="1_follower"]
 [ext_resource type="Texture2D" uid="uid://b2rp6sdeldgy5" path="res://characters/assets/PlayerElephant/PlayerElephantIdle.png" id="2_hr3ov"]
 [ext_resource type="Texture2D" uid="uid://ncgrb3dj7e4c" path="res://characters/assets/PlayerElephant/PlayerElephantRun.png" id="3_cia76"]
+[ext_resource type="AudioStream" uid="uid://cm4y8mwp8up71" path="res://audio/elephant-roar.wav" id="4_lskb2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_follower"]
 size = Vector2(105, 82.5)
@@ -94,3 +95,6 @@ shape = SubResource("CapsuleShape2D_m2uku")
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="Flipper/Area2D"]
 position = Vector2(-2.25, 98)
 shape = SubResource("RectangleShape2D_0es1o")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_lskb2")

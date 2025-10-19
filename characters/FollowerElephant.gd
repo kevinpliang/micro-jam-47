@@ -20,6 +20,7 @@ func _ready():
 	# Connect area detection to activate on player touch
 	$Flipper/Area2D.area_entered.connect(_on_area_entered)
 	$Flipper/Body.play("idle")
+	
 
 func _get_collision_owner(area: Node) -> CharacterBody2D:
 	var owner := area
@@ -98,6 +99,7 @@ func activate(player_ref: Node2D, chain_pos: int = 0):
 	state = "in_group"
 	target = player_ref
 	chain_position = chain_pos
+	$AudioStreamPlayer2D.play()
 
 	# Calculate spacing based on chain position
 	# Further followers have much less spacing for tight group effect

@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://cvn8rqtnwi646"]
+[gd_scene load_steps=11 format=3 uid="uid://cvn8rqtnwi646"]
 
 [ext_resource type="Script" uid="uid://sn2y8firyy8d" path="res://characters/BabyElephant.gd" id="1_baby"]
 [ext_resource type="Texture2D" uid="uid://dw0vyp6sm0wnq" path="res://characters/assets/BabyElephant/BabyElephantIdle.png" id="2_ei6ek"]
 [ext_resource type="Texture2D" uid="uid://dcfjokvr7xbqu" path="res://characters/assets/BabyElephant/BabyElephantDeath.png" id="2_squko"]
 [ext_resource type="Texture2D" uid="uid://bxrjrf0lf7ynm" path="res://characters/assets/BabyElephant/BabyElephantRun.png" id="3_squko"]
+[ext_resource type="AudioStream" uid="uid://dcqncu6wv103w" path="res://audio/bounce.wav" id="5_lpit7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
 size = Vector2(69, 55.5)
@@ -70,3 +71,6 @@ position = Vector2(1.0079956, -3.9920044)
 
 [node name="CollisionShape2D6" type="CollisionShape2D" parent="Flipper/Area2D"]
 shape = SubResource("CircleShape2D_squko")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_lpit7")
