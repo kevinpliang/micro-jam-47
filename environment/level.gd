@@ -4,7 +4,7 @@ const PlayerElephant = preload("res://characters/PlayerElephant.tscn")
 const BabyElephant = preload("res://characters/BabyElephant.tscn")
 const Lion = preload("res://characters/Lion.tscn")
 const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
-const UpgradeSystem = preload("res://services/upgrade-system.gd")
+const UpgradeSystem = preload("res://services/UpgradeSystem.tscn")
 
 @export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
@@ -86,10 +86,9 @@ func _ready():
 	follower_arrow_container.name = "FollowerArrows"
 	$UI.add_child(follower_arrow_container)
 	$UI/ColorRect.visible = true
-	upgrade_system = UpgradeSystem.new()
-	add_child(upgrade_system)
-	if upgrade_system and upgrade_system.has_method("initialize"):
-		upgrade_system.initialize(self, $UI)
+	upgrade_system = UpgradeSystem.instantiate()
+	$UI.add_child(upgrade_system)
+	upgrade_system.initialize(self, $UI)
 	if baby_arrow:
 		baby_arrow.hide()
 		baby_arrow.play("default")
@@ -208,7 +207,6 @@ func _get_active_lion_count() -> int:
 	return count
 
 func _on_lion_defeated() -> void:
-	print("HELLO?")
 	lions_defeated += 1
 	_increase_player_exp(1)
 	if lion_spawn_stopped and not lion_victory_announced:
@@ -579,43 +577,25 @@ func apply_selected_upgrade(upgrade_id: String) -> void:
 	match upgrade_id:
 		"speed":
 			_apply_speed_upgrade()
-		"hitbox":
-			_apply_hitbox_upgrade()
+		"size":
+			_apply_size_upgrade()
+		"water_hitbox":
+			_apply_water_hitbox_upgrade()
+		_:
+			print("Upgrade type not found")
 
 func _apply_speed_upgrade() -> void:
-	player_speed_multiplier_upgrade *= 1.2
-	var new_speed := base_player_speed * player_speed_multiplier_upgrade
-	player_elephant_speed = new_speed
-	if is_instance_valid(player_elephant):
-		player_elephant.speed = new_speed
+	player_elephant.speed *= 1.2
+	player_elephant.scale_run_speed()
 	for follower in followers:
-		if is_instance_valid(follower):
-			follower.follow_speed = new_speed
+		follower.follow_speed *= 1.2
+			
+func _apply_size_upgrade():
+	player_elephant.scale.x*=1.2
+	player_elephant.scale.y*=1.2
 
-func _apply_hitbox_upgrade() -> void:
-	if !is_instance_valid(player_elephant):
-		return
-	var body_shape := player_elephant.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if body_shape and body_shape.shape:
-		_scale_shape(body_shape.shape, 1.3)
-	var area := player_elephant.get_node_or_null("Flipper/Area2D")
-	if area:
-		for child in area.get_children():
-			var collision_shape := child as CollisionShape2D
-			if collision_shape and collision_shape.shape:
-				_scale_shape(collision_shape.shape, 1.3)
-
-func _scale_shape(shape: Shape2D, factor: float) -> void:
-	if factor <= 0.0 or shape == null:
-		return
-	match shape:
-		RectangleShape2D:
-			shape.size *= factor
-		CapsuleShape2D:
-			shape.radius *= factor
-			shape.height *= factor
-		CircleShape2D:
-			shape.radius *= factor
+func _apply_water_hitbox_upgrade() -> void:
+	pass
 
 func add_follower_to_chain(follower: Node2D):
 	var is_new_follower: bool = false
@@ -663,6 +643,6 @@ func _count_in_group_followers() -> int:
 	return count
 
 func _increase_player_exp(amount: int) -> void:
-	print(_increase_player_exp)
 	player_exp += amount
 	exp_label.text = "XP: " + str(player_exp)
+	upgrade_system.on_exp_gained(player_exp)

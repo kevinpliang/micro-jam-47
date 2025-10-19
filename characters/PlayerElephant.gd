@@ -63,6 +63,9 @@ func _change_sprite():
 	else:
 		if body.animation != "idle":
 			body.play("idle")
+			
+func scale_run_speed() -> void:
+	$Flipper/Body.speed_scale*=1.2
 		
 func _get_collision_owner(area: Node) -> Node:
 	var owner := area
