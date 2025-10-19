@@ -1,7 +1,7 @@
 extends Node
 
 # the name of the player can't be changed
-@onready var player: CharacterBody2D = Main.player_elephant
+var player: CharacterBody2D = null
 
 # variables that effect the herd positioning
 @export var level_spacing: float = 150
@@ -17,10 +17,10 @@ class Arc:
 	var degrees
 		
 class FollowerElephant:
-	var position: Vector2 = Vector2(0,0)
+	var position: Vector2 = Vector2(0, 0)
 	
 class ElephantPosition:
-	var position: Vector2 = Vector2(0,0)
+	var position: Vector2 = Vector2(0, 0)
 	var age: float
 	var follower_reference: CharacterBody2D
 	
@@ -28,10 +28,10 @@ var arcs: Array[Arc] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	#pass # Replace with function body.
+	_refresh_player_reference()
 	for i in range(20):
 		var a: Arc = Arc.new()
-		a.radius = level_spacing * (i+1)
+		a.radius = level_spacing * (i + 1)
 		a.degrees = clamp(arc_degrees - 10 * i, 20, 200)
 		arcs.push_back(a)
 
@@ -48,28 +48,35 @@ func clear_cache():
 	follower_map.clear()
 	for arc in arcs:
 		arc.elephants.clear()
+
+func _refresh_player_reference() -> void:
+	if Main.player_elephant != null and !is_instance_valid(Main.player_elephant):
+		Main.player_elephant = null
+
+	if is_instance_valid(player):
+		return
+
+	if is_instance_valid(Main.player_elephant):
+		player = Main.player_elephant
+	else:
+		player = null
 		
-var last_velocity = Vector2(0,0)
+var last_velocity = Vector2(0, 0)
 var cleared = false
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if(player == null):
-		player = Main.player_elephant
-	
-	if(player == null):
+	_refresh_player_reference()
+
+	if player == null:
 		return
 	if player.velocity.length() == 0 and !cleared:
 		cleared = true
 		clear_cache()
-		
-		
-		
+
 	if player.velocity.length() != 0:
 		last_velocity = player.velocity
 		
 	# invalidate cache on change in velocity to 0
-	
-		
 	
 	var time = Time.get_ticks_msec()
 	# clear the old positions
@@ -90,8 +97,6 @@ func _process(delta: float) -> void:
 			#	follower_map.erase(arc.elephants[i].follower_reference)
 			#	arc.elephants.remove_at(i)
 				
-				
-		
 	# URGENT clear the cache of positions so followers can get fresh positions
 	pass
 
@@ -100,9 +105,6 @@ func _process(delta: float) -> void:
 # favortism towards elephants that are closer to the player?
 
 
-
-
-	
 var follower_map: Dictionary[CharacterBody2D, ElephantPosition]
 	
 var arc_width_multiplier: float = 1.0
@@ -111,12 +113,10 @@ var test_arc_length: float = 500
 func get_player_position():
 	return player.position
 
-func get_position (follower: CharacterBody2D) -> Vector2:
-	
+func get_position(follower: CharacterBody2D) -> Vector2:
 	# DEBUG
 	#for i in arcs.size():
 	#	print_debug("arc ", i, " size: ", arcs[i].elephants.size())
-	
 	# use old position
 	if follower_map.has(follower):
 		#print_debug("cache hit")
@@ -128,7 +128,7 @@ func get_position (follower: CharacterBody2D) -> Vector2:
 		# attempt to generate 5 random positions inside the current arc
 		for g in range(arcs.size()):
 			var arc_limits: Vector2 = arc_limits_from_velocity(last_velocity, arc.degrees)
-			var point: Vector2 = point_on_arc(player.position,arc.radius, arc_limits.x, arc_limits.y)
+			var point: Vector2 = point_on_arc(player.position, arc.radius, arc_limits.x, arc_limits.y)
 			# check point against elephants already in the arc
 			var valid = true
 			for e in arc.elephants:
@@ -154,7 +154,6 @@ func get_position (follower: CharacterBody2D) -> Vector2:
 			break
 			
 	return follower_map.get(follower).position
-	
 
 # math helper functins
 
@@ -170,10 +169,10 @@ func arc_limits_from_velocity(vel: Vector2, arc_width_deg: float) -> Vector2:
 
 	var base_deg: float = rad_to_deg(vel.angle() + PI) # opposite of velocity
 	var start_deg: float = base_deg - arc_width_deg * 0.5
-	var end_deg: float   = base_deg + arc_width_deg * 0.5
+	var end_deg: float = base_deg + arc_width_deg * 0.5
 	# Normalize to [0,360) for convenience
 	start_deg = fposmod(start_deg, 360.0)
-	end_deg   = fposmod(end_deg, 360.0)
+	end_deg = fposmod(end_deg, 360.0)
 	return Vector2(start_deg, end_deg)
 	
 # Returns a point exactly `radius` away from `center`,
@@ -204,11 +203,3 @@ func random_angle_in_range(start_deg: float, end_deg: float, rng: RandomNumberGe
 		var span := (360.0 - s) + e
 		var t := rng.randf() * span
 		return (s + t) if (s + t) < 360.0 else (s + t - 360.0)
-	 
-	
-	
-	
-	
-	
-	
-	

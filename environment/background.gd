@@ -40,9 +40,12 @@ func _process(_delta):
 
 func _update_tiles():
 	var camera_pos = player.position
-	var zoom_factor = 2.5
-	var visible_width = screen_size.x * zoom_factor
-	var visible_height = screen_size.y * zoom_factor
+	var camera := player.get_node_or_null("Camera2D") as Camera2D
+	var zoom: Vector2 = Vector2.ONE
+	if camera:
+		zoom = camera.zoom
+	var visible_width = screen_size.x / max(zoom.x, 0.001)
+	var visible_height = screen_size.y / max(zoom.y, 0.001)
 
 	var buffer = 5
 	var left_tile = int((camera_pos.x - visible_width / 2) / tile_size) - buffer

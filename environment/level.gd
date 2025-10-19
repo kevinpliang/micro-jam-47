@@ -10,6 +10,7 @@ const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 @export var base_pts_per_sec: float = 10.0 # Base score gain per second
 @export var player_spawn_radius: float = 500.0
 @export var baby_start_position: Vector2 = Vector2.ZERO
+@export var max_followers: int = 10
 
 var spawn_timer: float = 0.0
 var screen_size: Vector2
@@ -21,6 +22,9 @@ var stopwatch_label: Label
 var game_over_reason_label: Label
 var game_over_time_label: Label
 var game_over_score_label: Label
+@onready var baby_arrow: AnimatedSprite2D = $UI/BabyArrow
+var follower_arrow_container: Node2D
+var follower_arrows: Array[AnimatedSprite2D] = []
 var spawned_followers: Dictionary = {} # Track which tiles have spawned followers
 var followers: Array = [] # Track all active followers
 var activated_followers: int = 0 # Count of followers that have been activated
@@ -52,6 +56,12 @@ func _ready():
 	_update_stopwatch_label()
 	_reset_game_over_ui()
 	_spawn_elephants()
+	follower_arrow_container = Node2D.new()
+	follower_arrow_container.name = "FollowerArrows"
+	$UI.add_child(follower_arrow_container)
+	if baby_arrow:
+		baby_arrow.hide()
+		baby_arrow.play("default")
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -122,6 +132,13 @@ func _process(delta):
 		if display_target != score:
 			_set_score(display_target)
 
+func _exit_tree():
+	# Ensure global player reference doesn't point to a freed instance
+	if Main.player_elephant == player_elephant:
+		Main.player_elephant = null
+	elif Main.player_elephant != null and !is_instance_valid(Main.player_elephant):
+		Main.player_elephant = null
+
 func _spawn_lion():
 	var lion = Lion.instantiate()
 
@@ -130,10 +147,13 @@ func _spawn_lion():
 	var edge = randi() % 4
 	var spawn_pos = Vector2.ZERO
 
-	# Account for camera zoom (0.4 means we see 2.5x more)
-	var zoom_factor = 2.5 # 1 / 0.4
-	var visible_width = screen_size.x * zoom_factor
-	var visible_height = screen_size.y * zoom_factor
+	# Account for camera zoom dynamically so spawns stay just offscreen
+	var camera := player_elephant.get_node_or_null("Camera2D") as Camera2D
+	var zoom: Vector2 = Vector2.ONE
+	if camera:
+		zoom = camera.zoom
+	var visible_width = screen_size.x / max(zoom.x, 0.001)
+	var visible_height = screen_size.y / max(zoom.y, 0.001)
 	var spawn_margin = 100 # Extra distance outside view
 
 	match edge:
@@ -163,64 +183,97 @@ func _spawn_lion():
 	add_child(lion)
 
 func _check_baby_in_view():
-	var baby_pos = baby_elephant.position
 	var camera = get_viewport().get_camera_2d()
-	var camera_pos = camera.get_target_position()
+	if camera == null:
+		return
 
-	# Calculate ACTUAL camera bounds accounting for zoom
+	var bounds = _calculate_camera_bounds(camera)
+	var baby_pos = baby_elephant.position
+
+	if _is_position_offscreen(baby_pos, bounds):
+		_update_directional_arrow(baby_pos, baby_arrow, camera)
+		baby_arrow.show()
+	else:
+		baby_arrow.hide()
+
+	_update_follower_arrows(bounds, camera)
+
+func _calculate_camera_bounds(camera: Camera2D) -> Rect2:
+	var camera_pos = camera.get_target_position()
 	var zoom_factor = camera.zoom
 	var visible_width = screen_size.x / zoom_factor.x
 	var visible_height = screen_size.y / zoom_factor.y
+	var top_left = Vector2(camera_pos.x - visible_width / 2, camera_pos.y - visible_height / 2)
+	return Rect2(top_left, Vector2(visible_width, visible_height))
 
-	var half_width = visible_width / 2
-	var half_height = visible_height / 2
-	
-	var camera_left = camera_pos.x - half_width
-	var camera_right = camera_pos.x + half_width
-	var camera_top = camera_pos.y - half_height
-	var camera_bottom = camera_pos.y + half_height
+func _is_position_offscreen(position: Vector2, bounds: Rect2) -> bool:
+	return not bounds.has_point(position)
 
-	var is_offscreen = baby_pos.x < camera_left or baby_pos.x > camera_right or \
-					   baby_pos.y < camera_top or baby_pos.y > camera_bottom
-
-	if is_offscreen:
-		# Show arrow pointing to baby
-		_update_baby_arrow(baby_pos)
-		$UI/BabyArrow.show()
-	else:
-		# Baby is on screen, hide arrow
-		$UI/BabyArrow.hide()
-
-func _update_baby_arrow(baby_pos: Vector2):
-	var camera = get_viewport().get_camera_2d()
-	if not camera:
+func _update_follower_arrows(bounds: Rect2, camera: Camera2D) -> void:
+	if follower_arrow_container == null:
 		return
-		
+
+	_cleanup_followers()
+
+	var offscreen_positions: Array[Vector2] = []
+	for follower in followers:
+		if !is_instance_valid(follower):
+			continue
+		if follower.state != "inactive":
+			continue
+		var pos: Vector2 = follower.global_position
+		if _is_position_offscreen(pos, bounds):
+			offscreen_positions.append(pos)
+
+	_ensure_follower_arrow_capacity(offscreen_positions.size())
+
+	for i in range(offscreen_positions.size()):
+		var arrow = follower_arrows[i]
+		_update_directional_arrow(offscreen_positions[i], arrow, camera)
+		arrow.show()
+
+	for i in range(offscreen_positions.size(), follower_arrows.size()):
+		follower_arrows[i].hide()
+
+func _ensure_follower_arrow_capacity(required: int) -> void:
+	while follower_arrows.size() < required:
+		var arrow := _create_follower_arrow()
+		follower_arrows.append(arrow)
+
+func _create_follower_arrow() -> AnimatedSprite2D:
+	var arrow: AnimatedSprite2D = baby_arrow.duplicate()
+	arrow.name = "FollowerArrow_%d" % follower_arrows.size()
+	arrow.visible = false
+	arrow.play("default")
+	follower_arrow_container.add_child(arrow)
+	return arrow
+
+func _update_directional_arrow(target_pos: Vector2, arrow: AnimatedSprite2D, camera: Camera2D):
+	if arrow == null or camera == null:
+		return
+
 	var camera_pos = camera.global_position
 	var screen_size = get_viewport_rect().size
-	var arrow = $UI/BabyArrow
-	
-	var direction = (baby_pos - camera_pos).normalized()
-	var angle = direction.angle()
-	arrow.rotation = angle
+	var direction = target_pos - camera_pos
+	if direction.length_squared() == 0:
+		return
 
-	# Calculate intersection with screen edge
+	direction = direction.normalized()
+	arrow.rotation = direction.angle()
+
 	var half_w = screen_size.x / 2.0
 	var half_h = screen_size.y / 2.0
 	var padding = 90.0
-
-	# Start with large values and clamp to find where line hits screen boundary
 	var dx = direction.x
 	var dy = direction.y
-	var t = INF
-	
+	var t := INF
+
 	if abs(dx) > 0.0001:
 		t = min(t, half_w / abs(dx))
 	if abs(dy) > 0.0001:
 		t = min(t, half_h / abs(dy))
-	
+
 	var edge_point = direction * t
-	# Bring it slightly inward
 	var arrow_pos = screen_size / 2 + (edge_point - direction * padding)
 	arrow.position = arrow_pos
 
@@ -319,14 +372,19 @@ func _check_follower_spawns():
 		_try_spawn_follower_in_region(current_tile)
 
 func _try_spawn_follower_in_region(center_tile: Vector2i):
+	_cleanup_followers()
+
 	# Spawn followers ONLY in tiles that are currently OFF-SCREEN
 	var tile_size = 200
 	var camera_pos = player_elephant.position
 
-	# Calculate visible area
-	var zoom_factor = 2.5 # 1 / 0.4
-	var visible_width = screen_size.x * zoom_factor
-	var visible_height = screen_size.y * zoom_factor
+	# Calculate visible area based on the current camera zoom
+	var camera := player_elephant.get_node_or_null("Camera2D") as Camera2D
+	var zoom: Vector2 = Vector2.ONE
+	if camera:
+		zoom = camera.zoom
+	var visible_width = screen_size.x / max(zoom.x, 0.001)
+	var visible_height = screen_size.y / max(zoom.y, 0.001)
 
 	# Calculate which tiles are visible
 	var camera_tile_x = int(camera_pos.x / tile_size)
@@ -353,10 +411,12 @@ func _try_spawn_follower_in_region(center_tile: Vector2i):
 			if tile_dist_x > visible_tile_radius_x or tile_dist_y > visible_tile_radius_y:
 				# Random chance to spawn
 				if randf() < follower_spawn_chance:
-					_spawn_follower(tile_key, tile_size)
-					spawned_followers[tile_key] = true
+					if _spawn_follower(tile_key, tile_size):
+						spawned_followers[tile_key] = true
 
-func _spawn_follower(tile_pos: Vector2i, tile_size: int):
+func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
+	_cleanup_followers()
+
 	var follower = FollowerElephant.instantiate()
 
 	# Spawn at random position within the tile
@@ -368,8 +428,24 @@ func _spawn_follower(tile_pos: Vector2i, tile_size: int):
 	follower.position = Vector2(spawn_x, spawn_y)
 	add_child(follower)
 	followers.append(follower)
+	return true
+
+func _cleanup_followers():
+	for i in range(followers.size() - 1, -1, -1):
+		var follower = followers[i]
+		if !is_instance_valid(follower):
+			followers.remove_at(i)
+
+	for i in range(deployed_followers.size() - 1, -1, -1):
+		var deployed = deployed_followers[i]
+		if !is_instance_valid(deployed):
+			deployed_followers.remove_at(i)
+
+	if follower_chain_tail != null and !is_instance_valid(follower_chain_tail):
+		follower_chain_tail = null
 
 func _update_follower_count():
+	_cleanup_followers()
 	# Count how many followers are currently in the group (not deployed)
 	var count = 0
 	for follower in followers:
@@ -383,6 +459,15 @@ func _update_follower_count():
 			follower_count_label.text = str(count)
 
 func add_follower_to_chain(follower: Node2D):
+	var current_group_count = _count_in_group_followers()
+	if current_group_count >= max_followers and follower.state != "in_group":
+		# If a recalled follower tries to rejoin while the herd is full,
+		# keep them deployed at their current position instead of re-adding.
+		if follower.state == "returning":
+			if !deployed_followers.has(follower):
+				deployed_followers.append(follower)
+			follower.deploy_to_position(follower.global_position)
+		return
 	# Add follower to the end of the chain
 	# Works for both new followers and returning followers
 	if follower_chain_tail == null:
@@ -431,6 +516,7 @@ func _get_follower_at_position(world_pos: Vector2) -> Node2D:
 	return null
 
 func _count_in_group_followers() -> int:
+	_cleanup_followers()
 	# Count followers currently in the group
 	var count = 0
 	for follower in followers:

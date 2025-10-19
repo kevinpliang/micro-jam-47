@@ -126,7 +126,6 @@ func _on_area_entered(area):
 		set_physics_process(false)
 
 func bounce_off_player(player_position: Vector2):
-	print('im bouncy')
 	var away = global_position - player_position
 	if away.length_squared() == 0.0:
 		away = Vector2.RIGHT
