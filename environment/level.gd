@@ -52,6 +52,7 @@ var upgrade_system: Node = null
 var total_followers_collected: int = 0
 var base_player_speed: float = 0.0
 var player_speed_multiplier_upgrade: float = 1.0
+var follower_size_multiplier: float = 1.0
 var _tree_paused_before_upgrade: bool = false
 var _state_before_upgrade: int = Main.GameState.PLAYING
 var _upgrade_pause_active: bool = false
@@ -536,7 +537,7 @@ func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
 	var tile_world_y = tile_pos.y * tile_size
 	var spawn_x = tile_world_x + randf_range(20, tile_size - 20)
 	var spawn_y = tile_world_y + randf_range(20, tile_size - 20)
-
+	follower.scale *= follower_size_multiplier
 	follower.position = Vector2(spawn_x, spawn_y)
 	add_child(follower)
 	followers.append(follower)
@@ -593,11 +594,12 @@ func _apply_speed_upgrade() -> void:
 		follower.follow_speed *= 1.2
 		
 func _apply_follower_size_upgrade():
-	pass
+	follower_size_multiplier *= 1.2
+	for follower in followers:
+		follower.scale *= 1.2
 			
 func _apply_size_upgrade():
-	player_elephant.scale.x*=1.2
-	player_elephant.scale.y*=1.2
+	player_elephant.scale *= 1.2
 
 func _apply_water_hitbox_upgrade() -> void:
 	pass
