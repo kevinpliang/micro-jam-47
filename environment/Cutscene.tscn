@@ -256,7 +256,7 @@ visible_ratio = 0.29
 position = Vector2(1277, 186)
 
 [node name="PlayerElephant" parent="." instance=ExtResource("2_3jo81")]
-position = Vector2(249, 131)
+position = Vector2(0, 134)
 
 [node name="Label" type="Label" parent="PlayerElephant"]
 z_index = 2
@@ -297,6 +297,7 @@ position = Vector2(629, -41)
 zoom = Vector2(0.8, 0.8)
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 custom_minimum_size = Vector2(20000, 2000)
 anchors_preset = 15
 anchor_right = 1.0
