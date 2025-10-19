@@ -7,7 +7,7 @@ const FollowerElephant = preload("res://characters/FollowerElephant.tscn")
 const UpgradeSystem = preload("res://services/UpgradeSystem.tscn")
 const SAVE_PATH = "user://highscore.bin"
 
-@export var lion_spawn_duration: float = 300.0 # Seconds before lions stop spawning (10 minutes by default)
+@export var lion_spawn_duration: float = 180.0 # Seconds before lions stop spawning (10 minutes by default)
 @export var lion_spawn_start_interval: float = 5.0 # Early-game lion spawn interval (1 lion every 5 seconds)
 @export var lion_spawn_max_rate: float = 5.0 # Maximum lions spawned per second near the end
 @export var lion_spawn_ramp_ratio: float = 1.00 # Fraction of duration before max spawn rate is reached

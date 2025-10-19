@@ -1,13 +1,16 @@
 [gd_scene load_steps=11 format=3 uid="uid://cvn8rqtnwi646"]
 
 [ext_resource type="Script" uid="uid://sn2y8firyy8d" path="res://characters/BabyElephant.gd" id="1_baby"]
-[ext_resource type="Texture2D" uid="uid://dw0vyp6sm0wnq" path="res://characters/assets/BabyElephant/BabyElephantIdle.png" id="2_ei6ek"]
 [ext_resource type="Texture2D" uid="uid://dcfjokvr7xbqu" path="res://characters/assets/BabyElephant/BabyElephantDeath.png" id="2_squko"]
 [ext_resource type="Texture2D" uid="uid://bxrjrf0lf7ynm" path="res://characters/assets/BabyElephant/BabyElephantRun.png" id="3_squko"]
 [ext_resource type="AudioStream" uid="uid://dcqncu6wv103w" path="res://audio/bounce.wav" id="5_lpit7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_baby"]
 size = Vector2(69, 55.5)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_squko"]
+atlas = ExtResource("3_squko")
+region = Rect2(512, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lpit7"]
 atlas = ExtResource("3_squko")
@@ -29,7 +32,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_ei6ek")
+"texture": SubResource("AtlasTexture_squko")
 }],
 "loop": true,
 "name": &"idle",
@@ -64,7 +67,7 @@ shape = SubResource("RectangleShape2D_baby")
 position = Vector2(0.0079956055, -33.992004)
 scale = Vector2(0.668, 0.668)
 sprite_frames = SubResource("SpriteFrames_atetw")
-animation = &"die"
+animation = &"idle"
 
 [node name="Area2D" type="Area2D" parent="Flipper"]
 position = Vector2(1.0079956, -3.9920044)
