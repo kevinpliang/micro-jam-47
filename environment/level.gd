@@ -29,6 +29,8 @@ var game_over_time_label: Label
 var game_over_score_label: Label
 var game_over_result_label: Label
 @onready var baby_arrow: AnimatedSprite2D = $UI/BabyArrow
+@onready var follower_arrow: AnimatedSprite2D = $UI/FollowerArrow
+@onready var water_arrow: AnimatedSprite2D = $UI/WaterArrow
 var follower_arrow_container: Node2D
 var follower_arrows: Array[AnimatedSprite2D] = []
 var spawned_followers: Dictionary = {} # Track which tiles have spawned followers
@@ -82,6 +84,7 @@ func _ready():
 	follower_arrow_container = Node2D.new()
 	follower_arrow_container.name = "FollowerArrows"
 	$UI.add_child(follower_arrow_container)
+	$UI/ColorRect.visible = true
 	upgrade_system = UpgradeSystem.new()
 	add_child(upgrade_system)
 	if upgrade_system and upgrade_system.has_method("initialize"):
@@ -89,6 +92,10 @@ func _ready():
 	if baby_arrow:
 		baby_arrow.hide()
 		baby_arrow.play("default")
+	if follower_arrow:
+		follower_arrow.hide()
+	if water_arrow:
+		water_arrow.hide()
 
 func _spawn_elephants():
 	# Spawn elephants at configured start positions
@@ -287,28 +294,43 @@ func _update_follower_arrows(bounds: Rect2, camera: Camera2D) -> void:
 		return
 
 	_cleanup_followers()
+	
+	var offscreen_data: Array = []  # Array of {pos, dist}
+	var player_pos: Vector2 = player_elephant.global_position
 
-	var offscreen_positions: Array[Vector2] = []
 	for follower in followers:
 		if !is_instance_valid(follower):
 			continue
 		if follower.state != "inactive":
 			continue
+
 		var pos: Vector2 = follower.global_position
 		if _is_position_offscreen(pos, bounds):
-			offscreen_positions.append(pos)
+			var dist: float = player_pos.distance_to(pos)
+			offscreen_data.append({"pos": pos, "dist": dist})
 
-	_ensure_follower_arrow_capacity(offscreen_positions.size())
+	# Sort by distance
+	offscreen_data.sort_custom(func(a, b): return a["dist"] < b["dist"])
 
-	for i in range(offscreen_positions.size()):
+	# Keep only the three nearest
+	if offscreen_data.size() > 3:
+		offscreen_data = offscreen_data.slice(0, 3)
+
+	# Ensure arrow capacity
+	_ensure_follower_arrow_capacity(offscreen_data.size())
+
+	# Update visible arrows
+	for i in range(offscreen_data.size()):
 		var arrow = follower_arrows[i]
-		_update_directional_arrow(offscreen_positions[i], arrow, camera)
+		_update_directional_arrow(offscreen_data[i]["pos"], arrow, camera)
 		arrow.show()
 
-	for i in range(offscreen_positions.size(), follower_arrows.size()):
+	# Hide any extra arrows
+	for i in range(offscreen_data.size(), follower_arrows.size()):
 		follower_arrows[i].hide()
 
-	follower_arrow_container.visible = offscreen_positions.size() > 0
+	follower_arrow_container.visible = offscreen_data.size() > 0
+
 
 func _ensure_follower_arrow_capacity(required: int) -> void:
 	while follower_arrows.size() < required:
@@ -316,10 +338,9 @@ func _ensure_follower_arrow_capacity(required: int) -> void:
 		follower_arrows.append(arrow)
 
 func _create_follower_arrow() -> AnimatedSprite2D:
-	var arrow: AnimatedSprite2D = baby_arrow.duplicate()
+	var arrow: AnimatedSprite2D = follower_arrow.duplicate()
 	arrow.name = "FollowerArrow_%d" % follower_arrows.size()
 	arrow.visible = false
-	arrow.play("default")
 	follower_arrow_container.add_child(arrow)
 	return arrow
 

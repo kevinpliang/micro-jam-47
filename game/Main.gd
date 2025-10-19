@@ -2,7 +2,7 @@ extends Node
 
 var current_scene = null
 var player_elephant = null
-var tutorial_played = false
+var tutorial_played = true # Change for debug
 
 enum GameState {
 	MENU, PLAYING, PAUSED, UPGRADE
