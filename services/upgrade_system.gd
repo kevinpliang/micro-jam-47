@@ -177,6 +177,7 @@ func _present_upgrade_menu() -> void:
 	is_showing = true
 	_set_buttons_disabled(false)
 	overlay.visible = true
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	if level_ref and level_ref.has_method("pause_for_upgrade"):
 		level_ref.pause_for_upgrade()
 
@@ -199,6 +200,7 @@ func _hide_overlay() -> void:
 	overlay.visible = false
 	is_showing = false
 	_set_buttons_disabled(true)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if level_ref and level_ref.has_method("resume_after_upgrade"):
 		level_ref.resume_after_upgrade()
 
