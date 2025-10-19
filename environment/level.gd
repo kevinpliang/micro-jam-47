@@ -51,7 +51,6 @@ var score_update_timer: float = 0.0
 var upgrade_system: Node = null
 var total_followers_collected: int = 0
 var player_speed_multiplier_upgrade: float = 1.0
-var follower_size_multiplier: float = 1.0
 var _tree_paused_before_upgrade: bool = false
 var _state_before_upgrade: int = Main.GameState.PLAYING
 var _upgrade_pause_active: bool = false
@@ -542,7 +541,7 @@ func _spawn_follower(tile_pos: Vector2i, tile_size: int) -> bool:
 	var tile_world_y = tile_pos.y * tile_size
 	var spawn_x = tile_world_x + randf_range(20, tile_size - 20)
 	var spawn_y = tile_world_y + randf_range(20, tile_size - 20)
-	follower.scale *= follower_size_multiplier
+	follower.scale *= upgrade_follower_size_multiplier
 	follower.position = Vector2(spawn_x, spawn_y)
 	add_child(follower)
 	followers.append(follower)
@@ -603,7 +602,7 @@ func _apply_speed_upgrade() -> void:
 	print('after', player_elephant.speed)
 		
 func _apply_follower_size_upgrade():
-	# follower_size_multiplier += .2
+	upgrade_follower_size_multiplier += .2
 	for follower in followers:
 		print('before', follower.scale)
 		follower.scale += Vector2(.2, .2)
