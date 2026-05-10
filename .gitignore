@@ -23,3 +23,8 @@ mono_crash.*.json
 
 # VSCode
 .vscode
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key

@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "micro_jam_47",
+  "project_id": "5d29a6b8-1585-4313-81b0-f00a341c0919"
+}
