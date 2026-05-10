@@ -4,13 +4,11 @@ const SHADOW_SHADER := preload("res://resources/visuals/painted_shadow.gdshader"
 const SHADOW_DIRECTION := Vector2(-0.62, 0.78)
 
 var _shadow_material: ShaderMaterial
-var _shadow_texture: GradientTexture2D
 
 func _init() -> void:
 	_shadow_material = ShaderMaterial.new()
 	_shadow_material.shader = SHADOW_SHADER
 	_shadow_material.set_shader_parameter("shadow_color", Color(0.05, 0.034, 0.022, 0.82))
-	_shadow_texture = _make_radial_texture()
 
 func pick_ground_texture(textures: Array[Texture2D], _tile_seed: int) -> Texture2D:
 	return textures[0]
@@ -38,10 +36,11 @@ func _add_painted_shadow(parent: Node, veg_sprite: Sprite2D, rng: RandomNumberGe
 	var shadow_scale: Vector2 = profile["scale"]
 	var shadow := Sprite2D.new()
 	shadow.name = "%s_PaintedShadow" % veg_sprite.name
-	shadow.texture = _shadow_texture
+	shadow.texture = veg_sprite.texture
+	shadow.flip_h = veg_sprite.flip_h
 	shadow.material = _shadow_material
 	shadow.position = veg_sprite.position + Vector2(0.0, foot_offset) + cast * cast_distance
-	shadow.rotation = cast.angle()
+	shadow.rotation = cast.angle() - PI * 0.5
 	shadow.scale = shadow_scale * rng.randf_range(0.94, 1.08)
 	shadow.z_index = veg_sprite.z_index - 1
 	shadow.light_mask = 1
@@ -77,48 +76,36 @@ func _add_soft_occluder(veg_sprite: Sprite2D) -> void:
 
 func _get_shadow_profile(veg_sprite: Sprite2D) -> Dictionary:
 	if veg_sprite.texture == null:
-		return {"foot_offset": 0.0, "cast_distance": 24.0, "scale": Vector2(0.45, 0.18)}
+		return {"foot_offset": 0.0, "cast_distance": 24.0, "scale": Vector2(1.0, 0.35)}
 
 	var texture_path := veg_sprite.texture.resource_path.to_lower()
-	var width := float(veg_sprite.texture.get_width()) * absf(veg_sprite.scale.x)
-	var height := float(veg_sprite.texture.get_height()) * absf(veg_sprite.scale.y)
-	var target_width := maxf(width * 0.78, 54.0)
-	var target_height := maxf(height * 0.22, 18.0)
+	var texture_width := float(veg_sprite.texture.get_width())
+	var texture_height := float(veg_sprite.texture.get_height())
+	var width := texture_width * absf(veg_sprite.scale.x)
+	var height := texture_height * absf(veg_sprite.scale.y)
+	var target_width := maxf(width * 0.62, 44.0)
+	var target_height := maxf(height * 0.34, 22.0)
 	var foot_offset := height * 0.20
-	var cast_distance := clampf(height * 0.22, 20.0, 48.0)
+	var cast_distance := clampf(height * 0.20, 18.0, 48.0)
 
 	if texture_path.contains("bush"):
-		target_width = maxf(width * 1.10, 150.0)
-		target_height = maxf(height * 0.36, 52.0)
+		target_width = maxf(width * 0.68, 108.0)
+		target_height = maxf(height * 0.38, 52.0)
 		foot_offset = height * 0.18
-		cast_distance = clampf(height * 0.42, 58.0, 98.0)
+		cast_distance = clampf(height * 0.22, 34.0, 62.0)
 	elif texture_path.contains("rock"):
-		target_width = maxf(width * 1.04, 58.0)
-		target_height = maxf(height * 0.30, 20.0)
+		target_width = maxf(width * 0.74, 38.0)
+		target_height = maxf(height * 0.34, 14.0)
 		foot_offset = height * 0.20
-		cast_distance = clampf(height * 0.30, 26.0, 76.0)
+		cast_distance = clampf(height * 0.18, 16.0, 42.0)
 	elif texture_path.contains("grass"):
-		target_width = maxf(width * 0.78, 50.0)
-		target_height = maxf(height * 0.26, 20.0)
+		target_width = maxf(width * 0.42, 22.0)
+		target_height = maxf(height * 0.42, 24.0)
 		foot_offset = height * 0.24
-		cast_distance = clampf(height * 0.28, 28.0, 64.0)
+		cast_distance = clampf(height * 0.20, 20.0, 48.0)
 
 	return {
 		"foot_offset": foot_offset,
 		"cast_distance": cast_distance,
-		"scale": Vector2(target_width / 256.0, target_height / 128.0)
+		"scale": Vector2(target_width / texture_width, target_height / texture_height)
 	}
-
-func _make_radial_texture() -> GradientTexture2D:
-	var gradient := Gradient.new()
-	gradient.set_color(0, Color(1.0, 1.0, 1.0, 0.84))
-	gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
-
-	var texture := GradientTexture2D.new()
-	texture.width = 256
-	texture.height = 128
-	texture.fill = 1
-	texture.fill_from = Vector2(0.5, 0.5)
-	texture.fill_to = Vector2(1.0, 0.5)
-	texture.gradient = gradient
-	return texture

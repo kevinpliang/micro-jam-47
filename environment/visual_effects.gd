@@ -2,6 +2,7 @@ extends Node
 
 const OVERLAY_SHADER := preload("res://resources/visuals/screen_golden_hour.gdshader")
 const CHARACTER_SHADER := preload("res://resources/visuals/cute_rim_light.gdshader")
+const SHADOW_SHADER := preload("res://resources/visuals/painted_shadow.gdshader")
 
 @export var sun_direction: Vector2 = Vector2(0.62, -0.78)
 @export var ambient_color: Color = Color(0.42, 0.36, 0.30, 1.0)
@@ -12,12 +13,17 @@ const CHARACTER_SHADER := preload("res://resources/visuals/cute_rim_light.gdshad
 
 var _overlay_material: ShaderMaterial
 var _character_material: ShaderMaterial
+var _silhouette_shadow_material: ShaderMaterial
 var _shadow_texture: GradientTexture2D
 var _overlay_rect: ColorRect
 var _decorate_timer: float = 0.0
 var _decorated_ids: Dictionary = {}
+var _animated_shadows: Array[Dictionary] = []
 
 func _ready() -> void:
+	if get_parent().get_node_or_null("World25D") != null:
+		set_process(false)
+		return
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	call_deferred("_setup_runtime_visuals")
 
@@ -26,6 +32,7 @@ func _process(delta: float) -> void:
 		_overlay_material.set_shader_parameter("time", Time.get_ticks_msec() / 1000.0)
 	if _overlay_rect:
 		_overlay_rect.size = get_viewport().get_visible_rect().size
+	_sync_animated_shadows()
 	_decorate_timer -= delta
 	if _decorate_timer <= 0.0:
 		_decorate_timer = 0.35
@@ -49,6 +56,10 @@ func _build_materials() -> void:
 	_character_material.shader = CHARACTER_SHADER
 	_character_material.set_shader_parameter("light_direction", sun_direction.normalized())
 	_character_material.set_shader_parameter("rim_strength", rim_strength)
+
+	_silhouette_shadow_material = ShaderMaterial.new()
+	_silhouette_shadow_material.shader = SHADOW_SHADER
+	_silhouette_shadow_material.set_shader_parameter("shadow_color", Color(0.045, 0.03, 0.02, 0.76))
 
 	_shadow_texture = _make_radial_texture(
 		Color(1.0, 1.0, 1.0, 0.76),
@@ -103,7 +114,7 @@ func _decorate_character_sprites() -> void:
 			continue
 		body.material = _character_material
 		body.light_mask = 1
-		_add_contact_shadow(node)
+		_add_contact_shadow(node, body)
 		_add_character_occluder(node)
 		_decorated_ids[id] = true
 
@@ -115,7 +126,7 @@ func _get_character_candidates() -> Array[Node]:
 				candidates.append(node)
 	return candidates
 
-func _add_contact_shadow(character: Node) -> void:
+func _add_contact_shadow(character: Node, body: CanvasItem) -> void:
 	if character.get_node_or_null("GoldenHourContactShadow"):
 		return
 	var cast := _shadow_direction()
@@ -131,17 +142,46 @@ func _add_contact_shadow(character: Node) -> void:
 	character.add_child(contact)
 	character.move_child(contact, 0)
 
-	var tail := Sprite2D.new()
+	var animated_body := body as AnimatedSprite2D
+	if animated_body == null:
+		return
+
+	var tail := AnimatedSprite2D.new()
 	tail.name = "GoldenHourCastShadow"
-	tail.texture = _shadow_texture
-	tail.position = cast * 158.0 + Vector2(0.0, 76.0)
-	tail.scale = Vector2(3.05, 0.46)
-	tail.rotation = cast.angle()
-	tail.self_modulate = Color(0.052, 0.034, 0.022, shadow_opacity * 0.70)
+	tail.sprite_frames = animated_body.sprite_frames
+	tail.animation = animated_body.animation
+	tail.frame = animated_body.frame
+	tail.centered = animated_body.centered
+	tail.position = animated_body.position + cast * 96.0 + Vector2(0.0, 76.0)
+	tail.scale = Vector2(animated_body.scale.x * 0.64, animated_body.scale.y * 0.42)
+	tail.rotation = cast.angle() - PI * 0.5
+	tail.material = _silhouette_shadow_material
+	tail.self_modulate = Color(1.0, 1.0, 1.0, shadow_opacity * 0.82)
 	tail.z_index = 0
 	tail.light_mask = 1
 	character.add_child(tail)
 	character.move_child(tail, 1)
+	_animated_shadows.append({"body_ref": weakref(animated_body), "shadow_ref": weakref(tail)})
+
+func _sync_animated_shadows() -> void:
+	for index in range(_animated_shadows.size() - 1, -1, -1):
+		var entry := _animated_shadows[index]
+		var body_ref := entry.get("body_ref") as WeakRef
+		var shadow_ref := entry.get("shadow_ref") as WeakRef
+		if body_ref == null or shadow_ref == null:
+			_animated_shadows.remove_at(index)
+			continue
+		var body := body_ref.get_ref() as AnimatedSprite2D
+		var shadow := shadow_ref.get_ref() as AnimatedSprite2D
+		if not is_instance_valid(body) or not is_instance_valid(shadow):
+			_animated_shadows.remove_at(index)
+			continue
+		shadow.sprite_frames = body.sprite_frames
+		if shadow.animation != body.animation:
+			shadow.animation = body.animation
+		shadow.frame = body.frame
+		shadow.flip_h = body.flip_h
+		shadow.flip_v = body.flip_v
 
 func _add_character_occluder(character: Node) -> void:
 	if character.get_node_or_null("GoldenHourOccluder"):

@@ -1,6 +1,8 @@
 extends Node2D
 
 const BackgroundVisuals = preload("res://environment/background_visuals.gd")
+const RENDER_25D_GROUND_GROUP := "render_25d_ground"
+const RENDER_25D_PROP_GROUP := "render_25d_prop"
 
 @export var tile_size: int = 150 # Tile size (used for positioning)
 @export var enable_visual_overhaul: bool = true
@@ -12,9 +14,11 @@ var screen_size: Vector2
 var tile_textures: Array[Texture2D] = []
 var vegetation_textures: Array[Texture2D] = []
 var visual_theme: BackgroundVisuals
+var using_world_25d: bool = false
 
 func _ready():
-	if enable_visual_overhaul:
+	using_world_25d = get_parent().get_node_or_null("World25D") != null
+	if enable_visual_overhaul and not using_world_25d:
 		visual_theme = BackgroundVisuals.new()
 
 	# Load background tile textures
@@ -75,6 +79,8 @@ func _update_tiles():
 				var tile_seed = hash(Vector2i(x, y))
 				if visual_theme:
 					sprite.texture = visual_theme.pick_ground_texture(tile_textures, tile_seed)
+				elif using_world_25d:
+					sprite.texture = tile_textures[0]
 				else:
 					sprite.texture = tile_textures[tile_seed % tile_textures.size()]
 				sprite.position = Vector2(x * tile_size + tile_size / 2.0, y * tile_size + tile_size / 2.0)
@@ -82,6 +88,11 @@ func _update_tiles():
 				sprite.z_index = -1
 				if visual_theme:
 					visual_theme.style_ground_tile(sprite, tile_seed)
+				elif using_world_25d:
+					var tint_roll := float(abs(tile_seed) % 100) / 100.0
+					var warm_shift := lerpf(0.995, 1.005, tint_roll)
+					sprite.self_modulate = Color(0.92 * warm_shift, 0.87 * warm_shift, 0.72, 1.0)
+				sprite.add_to_group(RENDER_25D_GROUND_GROUP)
 				add_child(sprite)
 				tile_nodes.append(sprite)
 
@@ -102,6 +113,7 @@ func _update_tiles():
 					veg_sprite.position.y += veg_sprite.texture.get_height() / 2
 
 					add_child(veg_sprite)
+					veg_sprite.add_to_group(RENDER_25D_PROP_GROUP)
 					tile_nodes.append(veg_sprite)
 					if visual_theme:
 						tile_nodes.append_array(visual_theme.decorate_vegetation(self, veg_sprite, rng))
