@@ -1,6 +1,9 @@
 extends Node2D
 
+const BackgroundVisuals = preload("res://environment/background_visuals.gd")
+
 @export var tile_size: int = 150 # Tile size (used for positioning)
+@export var enable_visual_overhaul: bool = true
 
 var player: Node2D
 var tiles: Dictionary = {} # Track spawned tiles
@@ -8,8 +11,12 @@ var screen_size: Vector2
 
 var tile_textures: Array[Texture2D] = []
 var vegetation_textures: Array[Texture2D] = []
+var visual_theme: BackgroundVisuals
 
 func _ready():
+	if enable_visual_overhaul:
+		visual_theme = BackgroundVisuals.new()
+
 	# Load background tile textures
 	tile_textures = [
 		load("res://environment/assets/background/sprite1.png"),
@@ -61,34 +68,45 @@ func _update_tiles():
 			new_tiles[key] = true
 
 			if not tiles.has(key):
+				var tile_nodes: Array[Node] = []
+
 				# --- Background tile ---
 				var sprite = Sprite2D.new()
 				var tile_seed = hash(Vector2i(x, y))
-				sprite.texture = tile_textures[tile_seed % tile_textures.size()]
+				if visual_theme:
+					sprite.texture = visual_theme.pick_ground_texture(tile_textures, tile_seed)
+				else:
+					sprite.texture = tile_textures[tile_seed % tile_textures.size()]
 				sprite.position = Vector2(x * tile_size + tile_size / 2.0, y * tile_size + tile_size / 2.0)
 				sprite.scale = Vector2(tile_size / sprite.texture.get_width(), tile_size / sprite.texture.get_height())
 				sprite.z_index = -1
+				if visual_theme:
+					visual_theme.style_ground_tile(sprite, tile_seed)
 				add_child(sprite)
-				
+				tile_nodes.append(sprite)
+
 				# --- Vegetation layer ---
 				var rng = RandomNumberGenerator.new()
 				rng.seed = tile_seed # consistent per tile
 				var veg_count = rng.randi_range(0, 10)
-				
+
 				if veg_count == 0:
 					var veg_sprite = Sprite2D.new()
 					var rand_texture = vegetation_textures[rng.randi_range(0, vegetation_textures.size() - 1)]
 					veg_sprite.texture = rand_texture
-					
+
 					veg_sprite.position = sprite.position
 					if rng.randi_range(0, 1):
 						veg_sprite.flip_h = true
-						
+
 					veg_sprite.position.y += veg_sprite.texture.get_height() / 2
 
 					add_child(veg_sprite)
-				
-				tiles[key] = sprite
+					tile_nodes.append(veg_sprite)
+					if visual_theme:
+						tile_nodes.append_array(visual_theme.decorate_vegetation(self, veg_sprite, rng))
+
+				tiles[key] = tile_nodes
 
 	# Remove tiles that are off-screen
 	var tiles_to_remove = []
@@ -97,5 +115,7 @@ func _update_tiles():
 			tiles_to_remove.append(key)
 
 	for key in tiles_to_remove:
-		tiles[key].queue_free()
+		for node in tiles[key]:
+			if is_instance_valid(node):
+				node.queue_free()
 		tiles.erase(key)

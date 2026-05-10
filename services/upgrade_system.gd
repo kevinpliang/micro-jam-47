@@ -4,7 +4,7 @@ signal upgrade_selected(upgrade_id: String)
 
 # --- Define your full upgrade pool ---
 const ALL_UPGRADES := [
-	{"id": "speed", "title": "Fleet Feet", "description": "+10% movement speed"},
+	{"id": "speed", "title": "Fleet Foot", "description": "+10% movement speed"},
 	{"id": "size", "title": "Huge Heart", "description": "+10% player size"},
 	{"id": "follower_size", "title": "Enlarged Elephants", "description": "+10% follower size"},
 	{"id": "baby_speed", "title": "Lord's Lullaby", "description": "-10% baby movement speed"},

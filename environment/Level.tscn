@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://ddgnlo0p2flp1"]
+[gd_scene load_steps=18 format=3 uid="uid://ddgnlo0p2flp1"]
 
 [ext_resource type="Script" uid="uid://wpe1mvbakxpw" path="res://environment/level.gd" id="1_u5nnp"]
 [ext_resource type="Script" uid="uid://husd7i7k6syc" path="res://environment/background.gd" id="2_bg"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://ch5ldeqp14pni" path="res://characters/assets/PlayerElephant/WaterArrow.png" id="6_kbjei"]
 [ext_resource type="FontFile" uid="uid://b7fwojrbinqdf" path="res://resources/fonts/Fredoka-SemiBold.ttf" id="7_ewcyr"]
 [ext_resource type="AudioStream" uid="uid://bfy2lxov2d2jn" path="res://resources/music/deez-nuts.ogg" id="8_f5i7p"]
+[ext_resource type="Script" path="res://environment/visual_effects.gd" id="9_visual"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rnbyv"]
 atlas = ExtResource("3_vrpqy")
@@ -96,6 +97,9 @@ script = ExtResource("1_u5nnp")
 [node name="Background" type="Node2D" parent="."]
 y_sort_enabled = true
 script = ExtResource("2_bg")
+
+[node name="VisualEffects" type="Node" parent="."]
+script = ExtResource("9_visual")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
